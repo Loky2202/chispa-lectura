@@ -1,0 +1,234 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Fredoka", "Nunito", ui-rounded, system-ui, sans-serif;
+  --font-body: "Nunito", system-ui, sans-serif;
+  --color-pika: #ffd93d;
+  --color-pika-dark: #f0b429;
+  --color-pika-light: #fff3bf;
+  --color-ink: #2d3142;
+  --color-cream: #fff8e1;
+  --color-mint: #4ecdc4;
+  --color-grape: #a78bfa;
+  --color-coral: #ff6b6b;
+  --color-sky: #7dd3fc;
+}
+
+@layer base {
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: var(--font-body);
+    background: var(--color-cream);
+    color: var(--color-ink);
+    overscroll-behavior: none;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 600;
+  }
+
+  button {
+    touch-action: manipulation;
+    font-family: inherit;
+  }
+
+  input,
+  textarea {
+    user-select: text;
+    font-family: inherit;
+  }
+
+  ::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+  }
+}
+
+@layer components {
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 1.5rem;
+    font-family: var(--font-display);
+    font-weight: 600;
+    transition: transform 0.12s ease, filter 0.12s ease;
+    cursor: pointer;
+  }
+
+  .btn:active {
+    transform: translateY(3px) scale(0.98);
+  }
+
+  .btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+
+  .btn-primary {
+    background: var(--color-pika);
+    color: var(--color-ink);
+    box-shadow: 0 6px 0 var(--color-pika-dark);
+  }
+
+  .btn-mint {
+    background: var(--color-mint);
+    color: #083b38;
+    box-shadow: 0 6px 0 #2ba69e;
+  }
+
+  .btn-white {
+    background: #fff;
+    color: var(--color-ink);
+    box-shadow: 0 6px 0 rgba(45, 49, 66, 0.12);
+  }
+
+  .card {
+    border-radius: 2rem;
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 10px 0 rgba(45, 49, 66, 0.07);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-12px);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(-4deg);
+  }
+  50% {
+    transform: translateY(-18px) rotate(4deg);
+  }
+}
+
+@keyframes wiggle {
+  0%,
+  100% {
+    transform: rotate(-3deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-8px);
+  }
+  40% {
+    transform: translateX(8px);
+  }
+  60% {
+    transform: translateX(-5px);
+  }
+  80% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes pop {
+  0% {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.06);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes star-pop {
+  0% {
+    transform: scale(0) rotate(-30deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.25) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(0);
+    opacity: 1;
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 217, 61, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 14px rgba(255, 217, 61, 0);
+  }
+}
+
+.animate-float {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float-slow 8s ease-in-out infinite;
+}
+
+.animate-wiggle {
+  animation: wiggle 1.6s ease-in-out infinite;
+}
+
+.animate-shake {
+  animation: shake 0.4s ease-in-out;
+}
+
+.animate-pop {
+  animation: pop 0.35s ease-out both;
+}
+
+.animate-star-pop {
+  animation: star-pop 0.5s cubic-bezier(0.2, 1.4, 0.4, 1) both;
+}
+
+.animate-glow {
+  animation: glow 2.2s ease-out infinite;
+}
+
+.dots-bg {
+  background-image: radial-gradient(rgba(45, 49, 66, 0.09) 1.5px, transparent 1.5px);
+  background-size: 26px 26px;
+}
+
+.safe-bottom {
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+}
+
+.text-shadow-soft {
+  text-shadow: 0 2px 0 rgba(255, 255, 255, 0.6);
+}

@@ -1,0 +1,1848 @@
+{
+  "worlds": [
+    {
+      "id": "bosque",
+      "title": "Bosque de los Sonidos",
+      "subtitle": "Escucha, rima y descubre",
+      "emoji": "🌳",
+      "theme": "forest",
+      "lessons": [
+        {
+          "id": "m0-l1",
+          "title": "¿Qué suena?",
+          "goal": "Reconocer sonidos y animales",
+          "emoji": "👂",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Quién hace muuu?",
+              "audio": "¿Quién hace muuu?",
+              "options": [
+                { "emoji": "🐄", "label": "vaca" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "vaca"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Qué hace ring ring?",
+              "audio": "¿Qué hace ring ring?",
+              "options": [
+                { "emoji": "🔔", "label": "campana" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "campana"
+            },
+            {
+              "id": "a3",
+              "type": "word_picture",
+              "prompt": "¿Quién dice guau guau?",
+              "audio": "¿Quién dice guau guau?",
+              "options": [
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🐸", "label": "rana" }
+              ],
+              "answer": "perro"
+            }
+          ]
+        },
+        {
+          "id": "m0-l2",
+          "title": "Rimas",
+          "goal": "Escuchar palabras que riman",
+          "emoji": "🎵",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Qué rima con pato?",
+              "audio": "¿Qué rima con pato?",
+              "options": [
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "gato"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Qué rima con luna?",
+              "audio": "¿Qué rima con luna?",
+              "options": [
+                { "emoji": "🛏️", "label": "cuna" },
+                { "emoji": "🚗", "label": "carro" },
+                { "emoji": "🍎", "label": "manzana" }
+              ],
+              "answer": "cuna"
+            },
+            {
+              "id": "a3",
+              "type": "word_picture",
+              "prompt": "¿Qué rima con ratón?",
+              "audio": "¿Qué rima con ratón?",
+              "options": [
+                { "emoji": "🚚", "label": "camión" },
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "camión"
+            }
+          ]
+        },
+        {
+          "id": "m0-l3",
+          "title": "Sonido inicial",
+          "goal": "Descubrir con qué letra empieza una palabra",
+          "emoji": "🔤",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Con qué letra empieza sol?",
+              "audio": "sol",
+              "options": ["s", "m", "l"],
+              "answer": "s"
+            },
+            {
+              "id": "a2",
+              "type": "listen_tap",
+              "prompt": "¿Con qué letra empieza luna?",
+              "audio": "luna",
+              "options": ["l", "p", "t"],
+              "answer": "l"
+            },
+            {
+              "id": "a3",
+              "type": "listen_tap",
+              "prompt": "¿Con qué letra empieza pato?",
+              "audio": "pato",
+              "options": ["p", "d", "n"],
+              "answer": "p"
+            }
+          ]
+        },
+        {
+          "id": "m0-l4",
+          "title": "Contar sílabas",
+          "goal": "Dar palmadas y contar sílabas",
+          "emoji": "👏",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "count_syllables",
+              "word": "sol",
+              "emoji": "☀️",
+              "options": [1, 2, 3],
+              "answer": 1
+            },
+            {
+              "id": "a2",
+              "type": "count_syllables",
+              "word": "pato",
+              "emoji": "🦆",
+              "options": [1, 2, 3],
+              "answer": 2
+            },
+            {
+              "id": "a3",
+              "type": "count_syllables",
+              "word": "mariposa",
+              "emoji": "🦋",
+              "options": [2, 3, 4],
+              "answer": 4
+            }
+          ]
+        },
+        {
+          "id": "m0-l5",
+          "title": "Palabras largas",
+          "goal": "Contar sílabas de palabras largas y cortas",
+          "emoji": "📏",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "count_syllables",
+              "word": "elefante",
+              "emoji": "🐘",
+              "options": [2, 3, 4],
+              "answer": 4
+            },
+            {
+              "id": "a2",
+              "type": "count_syllables",
+              "word": "pan",
+              "emoji": "🍞",
+              "options": [1, 2, 3],
+              "answer": 1
+            },
+            {
+              "id": "a3",
+              "type": "count_syllables",
+              "word": "bicicleta",
+              "emoji": "🚲",
+              "options": [2, 3, 4],
+              "answer": 4
+            }
+          ]
+        },
+        {
+          "id": "m0-l6",
+          "title": "Simón de sonidos",
+          "goal": "Entrenar la atención y la memoria",
+          "emoji": "🎧",
+          "activities": [
+            { "id": "a1", "type": "sequence", "length": 2 },
+            { "id": "a2", "type": "sequence", "length": 3 },
+            { "id": "a3", "type": "memory", "items": ["🔴", "🔵", "🟡", "🟢"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "vocales",
+      "title": "Isla de las Vocales",
+      "subtitle": "A, E, I, O, U",
+      "emoji": "🏝️",
+      "theme": "island",
+      "lessons": [
+        {
+          "id": "m1-l1",
+          "title": "La letra A",
+          "goal": "Reconocer y leer la a",
+          "emoji": "🅰️",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Cuál es la letra a?",
+              "audio": "a",
+              "options": ["a", "e", "o"],
+              "answer": "a"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con a?",
+              "audio": "¿Cuál empieza con a?",
+              "options": [
+                { "emoji": "✈️", "label": "avión" },
+                { "emoji": "🐻", "label": "oso" },
+                { "emoji": "🍇", "label": "uva" }
+              ],
+              "answer": "avión"
+            },
+            {
+              "id": "a3",
+              "type": "missing_letter",
+              "word": "ala",
+              "display": "_la",
+              "emoji": "🕊️",
+              "options": ["a", "e", "i"],
+              "answer": "a"
+            },
+            { "id": "a4", "type": "build_word", "word": "ala", "emoji": "🕊️" }
+          ]
+        },
+        {
+          "id": "m1-l2",
+          "title": "La letra E",
+          "goal": "Reconocer y leer la e",
+          "emoji": "🅴",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Cuál es la letra e?",
+              "audio": "e",
+              "options": ["a", "e", "i"],
+              "answer": "e"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con e?",
+              "audio": "¿Cuál empieza con e?",
+              "options": [
+                { "emoji": "🐘", "label": "elefante" },
+                { "emoji": "🐻", "label": "oso" },
+                { "emoji": "🍇", "label": "uva" }
+              ],
+              "answer": "elefante"
+            },
+            {
+              "id": "a3",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con e?",
+              "audio": "¿Cuál empieza con e?",
+              "options": [
+                { "emoji": "⭐", "label": "estrella" },
+                { "emoji": "🌙", "label": "luna" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "estrella"
+            },
+            {
+              "id": "a4",
+              "type": "missing_letter",
+              "word": "mesa",
+              "display": "m_sa",
+              "emoji": "🪑",
+              "options": ["a", "e", "i"],
+              "answer": "e"
+            }
+          ]
+        },
+        {
+          "id": "m1-l3",
+          "title": "La letra I",
+          "goal": "Reconocer y leer la i",
+          "emoji": "🅸",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Cuál es la letra i?",
+              "audio": "i",
+              "options": ["e", "i", "o"],
+              "answer": "i"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con i?",
+              "audio": "¿Cuál empieza con i?",
+              "options": [
+                { "emoji": "🏝️", "label": "isla" },
+                { "emoji": "🐻", "label": "oso" },
+                { "emoji": "✈️", "label": "avión" }
+              ],
+              "answer": "isla"
+            },
+            { "id": "a3", "type": "build_word", "word": "isla", "emoji": "🏝️" },
+            {
+              "id": "a4",
+              "type": "missing_letter",
+              "word": "nido",
+              "display": "n_do",
+              "emoji": "🪺",
+              "options": ["a", "e", "i"],
+              "answer": "i"
+            }
+          ]
+        },
+        {
+          "id": "m1-l4",
+          "title": "La letra O",
+          "goal": "Reconocer y leer la o",
+          "emoji": "🅾️",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Cuál es la letra o?",
+              "audio": "o",
+              "options": ["a", "o", "u"],
+              "answer": "o"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con o?",
+              "audio": "¿Cuál empieza con o?",
+              "options": [
+                { "emoji": "🐻", "label": "oso" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🍇", "label": "uva" }
+              ],
+              "answer": "oso"
+            },
+            {
+              "id": "a3",
+              "type": "missing_letter",
+              "word": "sol",
+              "display": "s_l",
+              "emoji": "☀️",
+              "options": ["a", "e", "o"],
+              "answer": "o"
+            },
+            { "id": "a4", "type": "build_word", "word": "oso", "emoji": "🐻" }
+          ]
+        },
+        {
+          "id": "m1-l5",
+          "title": "La letra U",
+          "goal": "Reconocer y leer la u",
+          "emoji": "🆄",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Cuál es la letra u?",
+              "audio": "u",
+              "options": ["i", "o", "u"],
+              "answer": "u"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con u?",
+              "audio": "¿Cuál empieza con u?",
+              "options": [
+                { "emoji": "🍇", "label": "uva" },
+                { "emoji": "🐘", "label": "elefante" },
+                { "emoji": "✈️", "label": "avión" }
+              ],
+              "answer": "uva"
+            },
+            {
+              "id": "a3",
+              "type": "missing_letter",
+              "word": "luna",
+              "display": "l_na",
+              "emoji": "🌙",
+              "options": ["a", "e", "u"],
+              "answer": "u"
+            },
+            { "id": "a4", "type": "build_word", "word": "uva", "emoji": "🍇" }
+          ]
+        },
+        {
+          "id": "m1-l6",
+          "title": "Repaso de vocales",
+          "goal": "Jugar con las cinco vocales",
+          "emoji": "🎉",
+          "activities": [
+            { "id": "a1", "type": "memory", "items": ["a", "e", "i", "o", "u"] },
+            {
+              "id": "a2",
+              "type": "listen_tap",
+              "prompt": "¿Qué vocal suena?",
+              "audio": "o",
+              "options": ["a", "e", "o", "u"],
+              "answer": "o"
+            },
+            {
+              "id": "a3",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con u?",
+              "audio": "¿Cuál empieza con u?",
+              "options": [
+                { "emoji": "🦄", "label": "unicornio" },
+                { "emoji": "🐘", "label": "elefante" },
+                { "emoji": "🏝️", "label": "isla" }
+              ],
+              "answer": "unicornio"
+            },
+            {
+              "id": "a4",
+              "type": "listen_tap",
+              "prompt": "¿Qué vocal suena?",
+              "audio": "i",
+              "options": ["a", "i", "u"],
+              "answer": "i"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "silabas",
+      "title": "Valle de las Sílabas",
+      "subtitle": "Ma, pa, sa, la...",
+      "emoji": "🏞️",
+      "theme": "valley",
+      "lessons": [
+        {
+          "id": "m2-l1",
+          "title": "La letra M",
+          "goal": "Leer ma me mi mo mu",
+          "emoji": "🐒",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "ma",
+              "options": ["ma", "pa", "la"],
+              "answer": "ma"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con me?",
+              "audio": "¿Cuál empieza con me?",
+              "options": [
+                { "emoji": "🪑", "label": "mesa" },
+                { "emoji": "✋", "label": "mano" },
+                { "emoji": "🏍️", "label": "moto" }
+              ],
+              "answer": "mesa"
+            },
+            { "id": "a3", "type": "build_word", "word": "mico", "emoji": "🐵" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con mo?",
+              "audio": "¿Cuál empieza con mo?",
+              "options": [
+                { "emoji": "✋", "label": "mano" },
+                { "emoji": "🪑", "label": "mesa" },
+                { "emoji": "🐵", "label": "mico" },
+                { "emoji": "🏍️", "label": "moto" },
+                { "emoji": "🎵", "label": "música" }
+              ],
+              "answer": "moto"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "mu",
+              "options": ["ma", "me", "mi", "mo", "mu"],
+              "answer": "mu"
+            }
+          ]
+        },
+        {
+          "id": "m2-l2",
+          "title": "La letra P",
+          "goal": "Leer pa pe pi po pu",
+          "emoji": "🦆",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "pa",
+              "options": ["pa", "ma", "ta"],
+              "answer": "pa"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con pe?",
+              "audio": "¿Cuál empieza con pe?",
+              "options": [
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🍍", "label": "piña" }
+              ],
+              "answer": "perro"
+            },
+            { "id": "a3", "type": "build_word", "word": "piña", "emoji": "🍍" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con po?",
+              "audio": "¿Cuál empieza con po?",
+              "options": [
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🍍", "label": "piña" },
+                { "emoji": "🐔", "label": "pollo" },
+                { "emoji": "🐆", "label": "puma" }
+              ],
+              "answer": "pollo"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "pu",
+              "options": ["pa", "pe", "pi", "po", "pu"],
+              "answer": "pu"
+            }
+          ]
+        },
+        {
+          "id": "m2-l3",
+          "title": "La letra S",
+          "goal": "Leer sa se si so su",
+          "emoji": "🍉",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "sa",
+              "options": ["sa", "la", "na"],
+              "answer": "sa"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con se?",
+              "audio": "¿Cuál empieza con se?",
+              "options": [
+                { "emoji": "🐍", "label": "serpiente" },
+                { "emoji": "🍉", "label": "sandía" },
+                { "emoji": "🪑", "label": "silla" }
+              ],
+              "answer": "serpiente"
+            },
+            { "id": "a3", "type": "build_word", "word": "silla", "emoji": "🪑" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con so?",
+              "audio": "¿Cuál empieza con so?",
+              "options": [
+                { "emoji": "🍉", "label": "sandía" },
+                { "emoji": "🐍", "label": "serpiente" },
+                { "emoji": "🪑", "label": "silla" },
+                { "emoji": "☀️", "label": "sol" },
+                { "emoji": "➕", "label": "suma" }
+              ],
+              "answer": "sol"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "su",
+              "options": ["sa", "se", "si", "so", "su"],
+              "answer": "su"
+            }
+          ]
+        },
+        {
+          "id": "m2-l4",
+          "title": "La letra L",
+          "goal": "Leer la le li lo lu",
+          "emoji": "🌙",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "la",
+              "options": ["la", "ra", "da"],
+              "answer": "la"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con le?",
+              "audio": "¿Cuál empieza con le?",
+              "options": [
+                { "emoji": "🥛", "label": "leche" },
+                { "emoji": "🧶", "label": "lana" },
+                { "emoji": "📖", "label": "libro" }
+              ],
+              "answer": "leche"
+            },
+            { "id": "a3", "type": "build_word", "word": "libro", "emoji": "📖" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con lo?",
+              "audio": "¿Cuál empieza con lo?",
+              "options": [
+                { "emoji": "🧶", "label": "lana" },
+                { "emoji": "🥛", "label": "leche" },
+                { "emoji": "📖", "label": "libro" },
+                { "emoji": "🐺", "label": "lobo" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "lobo"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "lu",
+              "options": ["la", "le", "li", "lo", "lu"],
+              "answer": "lu"
+            }
+          ]
+        },
+        {
+          "id": "m2-l5",
+          "title": "La letra T",
+          "goal": "Leer ta te ti to tu",
+          "emoji": "☕",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "ta",
+              "options": ["ta", "pa", "da"],
+              "answer": "ta"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con te?",
+              "audio": "¿Cuál empieza con te?",
+              "options": [
+                { "emoji": "🫖", "label": "tetera" },
+                { "emoji": "☕", "label": "taza" },
+                { "emoji": "🐯", "label": "tigre" }
+              ],
+              "answer": "tetera"
+            },
+            { "id": "a3", "type": "build_word", "word": "tigre", "emoji": "🐯" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con to?",
+              "audio": "¿Cuál empieza con to?",
+              "options": [
+                { "emoji": "☕", "label": "taza" },
+                { "emoji": "🫖", "label": "tetera" },
+                { "emoji": "🐯", "label": "tigre" },
+                { "emoji": "🍅", "label": "tomate" },
+                { "emoji": "🦜", "label": "tucán" }
+              ],
+              "answer": "tomate"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "tu",
+              "options": ["ta", "te", "ti", "to", "tu"],
+              "answer": "tu"
+            }
+          ]
+        },
+        {
+          "id": "m2-l6",
+          "title": "La letra N",
+          "goal": "Leer na ne ni no nu",
+          "emoji": "☁️",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "na",
+              "options": ["na", "ma", "ra"],
+              "answer": "na"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con ne?",
+              "audio": "¿Cuál empieza con ne?",
+              "options": [
+                { "emoji": "👧", "label": "nena" },
+                { "emoji": "🍊", "label": "naranja" },
+                { "emoji": "👦", "label": "niño" }
+              ],
+              "answer": "nena"
+            },
+            { "id": "a3", "type": "build_word", "word": "niño", "emoji": "👦" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con no?",
+              "audio": "¿Cuál empieza con no?",
+              "options": [
+                { "emoji": "🍊", "label": "naranja" },
+                { "emoji": "👧", "label": "nena" },
+                { "emoji": "👦", "label": "niño" },
+                { "emoji": "🌙", "label": "noche" },
+                { "emoji": "☁️", "label": "nube" }
+              ],
+              "answer": "noche"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "nu",
+              "options": ["na", "ne", "ni", "no", "nu"],
+              "answer": "nu"
+            }
+          ]
+        },
+        {
+          "id": "m2-l7",
+          "title": "La letra D",
+          "goal": "Leer da de di do du",
+          "emoji": "🎲",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "da",
+              "options": ["da", "ta", "na"],
+              "answer": "da"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con de?",
+              "audio": "¿Cuál empieza con de?",
+              "options": [
+                { "emoji": "👆", "label": "dedo" },
+                { "emoji": "🎲", "label": "dado" },
+                { "emoji": "🍩", "label": "dona" }
+              ],
+              "answer": "dedo"
+            },
+            { "id": "a3", "type": "build_word", "word": "dona", "emoji": "🍩" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con di?",
+              "audio": "¿Cuál empieza con di?",
+              "options": [
+                { "emoji": "🎲", "label": "dado" },
+                { "emoji": "👆", "label": "dedo" },
+                { "emoji": "🦕", "label": "dinosaurio" },
+                { "emoji": "🍩", "label": "dona" },
+                { "emoji": "🍑", "label": "durazno" }
+              ],
+              "answer": "dinosaurio"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "du",
+              "options": ["da", "de", "di", "do", "du"],
+              "answer": "du"
+            }
+          ]
+        },
+        {
+          "id": "m2-l8",
+          "title": "La letra R",
+          "goal": "Leer ra re ri ro ru",
+          "emoji": "🐸",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "ra",
+              "options": ["ra", "la", "ma"],
+              "answer": "ra"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con re?",
+              "audio": "¿Cuál empieza con re?",
+              "options": [
+                { "emoji": "⏰", "label": "reloj" },
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🌹", "label": "rosa" }
+              ],
+              "answer": "reloj"
+            },
+            { "id": "a3", "type": "build_word", "word": "rosa", "emoji": "🌹" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con ri?",
+              "audio": "¿Cuál empieza con ri?",
+              "options": [
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "⏰", "label": "reloj" },
+                { "emoji": "🌊", "label": "río" },
+                { "emoji": "🌹", "label": "rosa" },
+                { "emoji": "🛣️", "label": "ruta" }
+              ],
+              "answer": "río"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "ru",
+              "options": ["ra", "re", "ri", "ro", "ru"],
+              "answer": "ru"
+            }
+          ]
+        },
+        {
+          "id": "m2-l9",
+          "title": "Repaso de sílabas",
+          "goal": "Mezclar todo lo aprendido",
+          "emoji": "🎯",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué sílaba suena?",
+              "audio": "mi",
+              "options": ["mi", "mo", "mu"],
+              "answer": "mi"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál empieza con mo?",
+              "audio": "¿Cuál empieza con mo?",
+              "options": [
+                { "emoji": "🐒", "label": "mono" },
+                { "emoji": "🍉", "label": "sandía" },
+                { "emoji": "🐘", "label": "elefante" }
+              ],
+              "answer": "mono"
+            },
+            { "id": "a3", "type": "memory", "items": ["ma", "pa", "sa", "la"] },
+            { "id": "a4", "type": "build_word", "word": "mesa", "emoji": "🪑" }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "palabras",
+      "title": "Ciudad de las Palabras",
+      "subtitle": "Une sílabas y lee",
+      "emoji": "🏙️",
+      "theme": "city",
+      "lessons": [
+        {
+          "id": "m3-l1",
+          "title": "Palabras de dos sílabas",
+          "goal": "Leer palabras cortas",
+          "emoji": "📖",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es mamá?",
+              "audio": "¿Cuál es mamá?",
+              "options": [
+                { "emoji": "👩", "label": "mamá" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "mamá"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es gato?",
+              "audio": "¿Cuál es gato?",
+              "options": [
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🐸", "label": "rana" }
+              ],
+              "answer": "gato"
+            },
+            { "id": "a3", "type": "build_word", "word": "sopa", "emoji": "🍲" }
+          ]
+        },
+        {
+          "id": "m3-l2",
+          "title": "Con M y P",
+          "goal": "Leer palabras con m y p",
+          "emoji": "🗺️",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es mapa?",
+              "audio": "¿Cuál es mapa?",
+              "options": [
+                { "emoji": "🗺️", "label": "mapa" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🐒", "label": "mono" }
+              ],
+              "answer": "mapa"
+            },
+            { "id": "a2", "type": "build_word", "word": "puma", "emoji": "🐆" },
+            {
+              "id": "a3",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "masa",
+              "options": ["masa", "mesa", "misa"],
+              "answer": "masa"
+            }
+          ]
+        },
+        {
+          "id": "m3-l3",
+          "title": "Con L, T, N, D, R",
+          "goal": "Leer palabras nuevas",
+          "emoji": "🥛",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es leche?",
+              "audio": "¿Cuál es leche?",
+              "options": [
+                { "emoji": "🥛", "label": "leche" },
+                { "emoji": "☕", "label": "taza" },
+                { "emoji": "☁️", "label": "nube" }
+              ],
+              "answer": "leche"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es dado?",
+              "audio": "¿Cuál es dado?",
+              "options": [
+                { "emoji": "🎲", "label": "dado" },
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "dado"
+            },
+            { "id": "a3", "type": "build_word", "word": "nido", "emoji": "🪺" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál es una taza?",
+              "audio": "¿Cuál es una taza?",
+              "options": [
+                { "emoji": "☕", "label": "taza" },
+                { "emoji": "🥛", "label": "leche" },
+                { "emoji": "🎲", "label": "dado" }
+              ],
+              "answer": "taza"
+            },
+            {
+              "id": "a5",
+              "type": "word_picture",
+              "prompt": "¿Cuál es una rana?",
+              "audio": "¿Cuál es una rana?",
+              "options": [
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🌙", "label": "luna" },
+                { "emoji": "☁️", "label": "nube" }
+              ],
+              "answer": "rana"
+            }
+          ]
+        },
+        {
+          "id": "m3-l4",
+          "title": "Familias de palabras",
+          "goal": "Agrupar por categorías",
+          "emoji": "🧠",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "odd_one_out",
+              "prompt": "¿Cuál no es un animal?",
+              "options": [
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "carro"
+            },
+            {
+              "id": "a2",
+              "type": "odd_one_out",
+              "prompt": "¿Cuál no es comida?",
+              "options": [
+                { "emoji": "🍎", "label": "manzana" },
+                { "emoji": "🍲", "label": "sopa" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "carro"
+            },
+            {
+              "id": "a3",
+              "type": "odd_one_out",
+              "prompt": "¿Cuál no está en la casa?",
+              "options": [
+                { "emoji": "🪑", "label": "silla" },
+                { "emoji": "🛏️", "label": "cama" },
+                { "emoji": "🐘", "label": "elefante" }
+              ],
+              "answer": "elefante"
+            }
+          ]
+        },
+        {
+          "id": "m3-l5",
+          "title": "Tres sílabas",
+          "goal": "Leer palabras más largas",
+          "emoji": "🍅",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es tomate?",
+              "audio": "¿Cuál es tomate?",
+              "options": [
+                { "emoji": "🍅", "label": "tomate" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "tomate"
+            },
+            {
+              "id": "a2",
+              "type": "count_syllables",
+              "word": "pelota",
+              "emoji": "⚽",
+              "options": [2, 3, 4],
+              "answer": 3
+            },
+            { "id": "a3", "type": "build_word", "word": "zapato", "emoji": "👟" }
+          ]
+        },
+        {
+          "id": "m3-l6",
+          "title": "La letra RR",
+          "goal": "Leer palabras con rr",
+          "emoji": "🚗",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "perro",
+              "options": ["perro", "pero", "peso"],
+              "answer": "perro"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál se escribe con rr?",
+              "audio": "¿Cuál se escribe con rr?",
+              "options": [
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "perro"
+            },
+            { "id": "a3", "type": "build_word", "word": "carro", "emoji": "🚗" }
+          ]
+        },
+        {
+          "id": "m3-l7",
+          "title": "Construir palabras",
+          "goal": "Ordenar letras y leer",
+          "emoji": "🧩",
+          "activities": [
+            { "id": "a1", "type": "build_word", "word": "pelota", "emoji": "⚽" },
+            { "id": "a2", "type": "build_word", "word": "tomate", "emoji": "🍅" },
+            { "id": "a3", "type": "build_word", "word": "camisa", "emoji": "👕" }
+          ]
+        },
+        {
+          "id": "m3-l8",
+          "title": "Dictado con voz",
+          "goal": "Escuchar y reconocer palabras",
+          "emoji": "🎧",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "luna",
+              "options": ["luna", "cuna", "lona"],
+              "answer": "luna"
+            },
+            {
+              "id": "a2",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "pato",
+              "options": ["pato", "gato", "palo"],
+              "answer": "pato"
+            },
+            {
+              "id": "a3",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "mesa",
+              "options": ["mesa", "misa", "masa"],
+              "answer": "mesa"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "frases",
+      "title": "Frases Mágicas",
+      "subtitle": "Lee tus primeras frases",
+      "emoji": "✨",
+      "theme": "magic",
+      "lessons": [
+        {
+          "id": "m4-l1",
+          "title": "Mi familia",
+          "goal": "Leer frases con mamá y papá",
+          "emoji": "👨‍👩‍👦",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "Mi mamá me ama.",
+              "options": [
+                { "emoji": "👩‍👦", "label": "mamá" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "mamá"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "Mi papá me mima.",
+              "options": [
+                { "emoji": "👨‍👦", "label": "papá" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "papá"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "Mi mamá me ama.",
+              "emoji": "👩‍👦"
+            }
+          ]
+        },
+        {
+          "id": "m4-l2",
+          "title": "Animales",
+          "goal": "Leer frases con animales",
+          "emoji": "🦆",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "El pato nada.",
+              "options": [
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "pato"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "La rana salta.",
+              "options": [
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "rana"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "La rana salta.",
+              "emoji": "🐸"
+            }
+          ]
+        },
+        {
+          "id": "m4-l3",
+          "title": "La noche",
+          "goal": "Leer frases con acciones",
+          "emoji": "🌙",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "El gato toma leche.",
+              "options": [
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "☁️", "label": "nube" }
+              ],
+              "answer": "gato"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "La luna sale de noche.",
+              "options": [
+                { "emoji": "🌙", "label": "luna" },
+                { "emoji": "☀️", "label": "sol" },
+                { "emoji": "⭐", "label": "estrella" }
+              ],
+              "answer": "luna"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "El gato toma leche.",
+              "emoji": "🐱"
+            }
+          ]
+        },
+        {
+          "id": "m4-l4",
+          "title": "Yo veo",
+          "goal": "Leer frases con veo",
+          "emoji": "👀",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "Yo veo un oso.",
+              "options": [
+                { "emoji": "🐻", "label": "oso" },
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🍇", "label": "uva" }
+              ],
+              "answer": "oso"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "Veo una nube blanca.",
+              "options": [
+                { "emoji": "☁️", "label": "nube" },
+                { "emoji": "🚗", "label": "carro" },
+                { "emoji": "🐱", "label": "gato" }
+              ],
+              "answer": "nube"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "Veo una nube blanca.",
+              "emoji": "☁️"
+            }
+          ]
+        },
+        {
+          "id": "m4-l5",
+          "title": "Carros y Pikachu",
+          "goal": "Leer frases divertidas",
+          "emoji": "🚗",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "El carro es rojo.",
+              "options": [
+                { "emoji": "🚗", "label": "carro" },
+                { "emoji": "🚌", "label": "autobús" },
+                { "emoji": "🚲", "label": "bicicleta" }
+              ],
+              "answer": "carro"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "Pikachu corre rápido.",
+              "options": [
+                { "emoji": "⚡", "label": "Pikachu" },
+                { "emoji": "🐢", "label": "tortuga" },
+                { "emoji": "🐌", "label": "caracol" }
+              ],
+              "answer": "Pikachu"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "El carro es rojo.",
+              "emoji": "🚗"
+            }
+          ]
+        },
+        {
+          "id": "m4-l6",
+          "title": "Comprendo lo que leo",
+          "goal": "Entender preguntas cortas",
+          "emoji": "🧠",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "sentence_picture",
+              "sentence": "El pato nada en el lago.",
+              "options": [
+                { "emoji": "🦆", "label": "pato" },
+                { "emoji": "🐱", "label": "gato" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "pato"
+            },
+            {
+              "id": "a2",
+              "type": "sentence_picture",
+              "sentence": "La rana salta muy alto.",
+              "options": [
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "🐶", "label": "perro" },
+                { "emoji": "🚗", "label": "carro" }
+              ],
+              "answer": "rana"
+            },
+            {
+              "id": "a3",
+              "type": "sentence_picture",
+              "sentence": "El sol sale de día.",
+              "options": [
+                { "emoji": "☀️", "label": "sol" },
+                { "emoji": "🌙", "label": "luna" },
+                { "emoji": "⭐", "label": "estrella" }
+              ],
+              "answer": "sol"
+            },
+            {
+              "id": "a4",
+              "type": "read_aloud",
+              "text": "Pikachu corre rápido.",
+              "emoji": "⚡"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "montana",
+      "title": "Montaña Traviesa",
+      "subtitle": "Sílabas difíciles",
+      "emoji": "⛰️",
+      "theme": "mountain",
+      "lessons": [
+        {
+          "id": "m5-l1",
+          "title": "Inversas con N",
+          "goal": "Leer pan, tren, sin, con",
+          "emoji": "🍞",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "pan",
+              "options": ["pan", "paz", "pal"],
+              "answer": "pan"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un tren?",
+              "audio": "¿Cuál es un tren?",
+              "options": [
+                { "emoji": "🚂", "label": "tren" },
+                { "emoji": "🚗", "label": "carro" },
+                { "emoji": "✈️", "label": "avión" }
+              ],
+              "answer": "tren"
+            },
+            { "id": "a3", "type": "build_word", "word": "pan", "emoji": "🍞" },
+            {
+              "id": "a4",
+              "type": "read_aloud",
+              "text": "Pan con miel y sin sal.",
+              "emoji": "🍞"
+            },
+            {
+              "id": "a5",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "con",
+              "options": ["con", "sin", "pan"],
+              "answer": "con"
+            }
+          ]
+        },
+        {
+          "id": "m5-l2",
+          "title": "Inversas con R",
+          "goal": "Leer arco, árbol, mar",
+          "emoji": "🌳",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "listen_tap",
+              "prompt": "¿Qué palabra suena?",
+              "audio": "arco",
+              "options": ["arco", "arca", "arto"],
+              "answer": "arco"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un árbol?",
+              "audio": "¿Cuál es un árbol?",
+              "options": [
+                { "emoji": "🌳", "label": "árbol" },
+                { "emoji": "🌈", "label": "arcoíris" },
+                { "emoji": "🐱", "label": "gato" }
+              ],
+              "answer": "árbol"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "El mar y el sol.",
+              "emoji": "🌊"
+            }
+          ]
+        },
+        {
+          "id": "m5-l3",
+          "title": "Trabadas con L",
+          "goal": "Leer plato, playa, globo, flor",
+          "emoji": "🎈",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un plato?",
+              "audio": "¿Cuál es un plato?",
+              "options": [
+                { "emoji": "🍽️", "label": "plato" },
+                { "emoji": "🏖️", "label": "playa" },
+                { "emoji": "👕", "label": "blusa" }
+              ],
+              "answer": "plato"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un globo?",
+              "audio": "¿Cuál es un globo?",
+              "options": [
+                { "emoji": "🎈", "label": "globo" },
+                { "emoji": "🌸", "label": "flor" },
+                { "emoji": "🧊", "label": "hielo" }
+              ],
+              "answer": "globo"
+            },
+            { "id": "a3", "type": "build_word", "word": "flor", "emoji": "🌸" },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál es la playa?",
+              "audio": "¿Cuál es la playa?",
+              "options": [
+                { "emoji": "🏖️", "label": "playa" },
+                { "emoji": "🎈", "label": "globo" },
+                { "emoji": "🍽️", "label": "plato" }
+              ],
+              "answer": "playa"
+            }
+          ]
+        },
+        {
+          "id": "m5-l4",
+          "title": "Trabadas con R",
+          "goal": "Leer tren, dragón, fresa",
+          "emoji": "🐉",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un dragón?",
+              "audio": "¿Cuál es un dragón?",
+              "options": [
+                { "emoji": "🐉", "label": "dragón" },
+                { "emoji": "🚂", "label": "tren" },
+                { "emoji": "🍓", "label": "fresa" }
+              ],
+              "answer": "dragón"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es una fresa?",
+              "audio": "¿Cuál es una fresa?",
+              "options": [
+                { "emoji": "🍓", "label": "fresa" },
+                { "emoji": "🐸", "label": "rana" },
+                { "emoji": "☀️", "label": "sol" }
+              ],
+              "answer": "fresa"
+            },
+            { "id": "a3", "type": "build_word", "word": "tren", "emoji": "🚂" }
+          ]
+        },
+        {
+          "id": "m5-l5",
+          "title": "Diptongos",
+          "goal": "Leer baile, auto, agua, huevo",
+          "emoji": "💧",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un baile?",
+              "audio": "¿Cuál es un baile?",
+              "options": [
+                { "emoji": "💃", "label": "baile" },
+                { "emoji": "🚗", "label": "auto" },
+                { "emoji": "🥚", "label": "huevo" }
+              ],
+              "answer": "baile"
+            },
+            {
+              "id": "a2",
+              "type": "word_picture",
+              "prompt": "¿Cuál es agua?",
+              "audio": "¿Cuál es agua?",
+              "options": [
+                { "emoji": "💧", "label": "agua" },
+                { "emoji": "☀️", "label": "sol" },
+                { "emoji": "🌙", "label": "luna" }
+              ],
+              "answer": "agua"
+            },
+            {
+              "id": "a3",
+              "type": "read_aloud",
+              "text": "El agua y el huevo.",
+              "emoji": "💧"
+            },
+            {
+              "id": "a4",
+              "type": "word_picture",
+              "prompt": "¿Cuál es un auto?",
+              "audio": "¿Cuál es un auto?",
+              "options": [
+                { "emoji": "🚗", "label": "auto" },
+                { "emoji": "💃", "label": "baile" },
+                { "emoji": "💧", "label": "agua" }
+              ],
+              "answer": "auto"
+            }
+          ]
+        },
+        {
+          "id": "m5-l6",
+          "title": "Palabras largas",
+          "goal": "Leer palabras de muchas sílabas",
+          "emoji": "🦕",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "count_syllables",
+              "word": "dinosaurio",
+              "emoji": "🦕",
+              "options": [2, 3, 4],
+              "answer": 4
+            },
+            { "id": "a2", "type": "build_word", "word": "mariposa", "emoji": "🦋" },
+            {
+              "id": "a3",
+              "type": "word_picture",
+              "prompt": "¿Cuál es una bicicleta?",
+              "audio": "¿Cuál es una bicicleta?",
+              "options": [
+                { "emoji": "🚲", "label": "bicicleta" },
+                { "emoji": "🚗", "label": "carro" },
+                { "emoji": "🛴", "label": "patineta" }
+              ],
+              "answer": "bicicleta"
+            }
+          ]
+        },
+        {
+          "id": "m5-l7",
+          "title": "La bruja y el dragón",
+          "goal": "Leer un microcuento",
+          "emoji": "🧙",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "La bruja y el dragón",
+              "pages": [
+                { "text": "La bruja tiene un dragón.", "emoji": "🧙" },
+                { "text": "El dragón no sabe volar.", "emoji": "🐉" },
+                { "text": "La bruja le enseña.", "emoji": "✨" },
+                { "text": "¡El dragón vuela alto!", "emoji": "🎉" }
+              ],
+              "questions": [
+                {
+                  "q": "¿Quién tiene un dragón?",
+                  "options": ["la bruja", "el pato", "el gato"],
+                  "answer": "la bruja"
+                },
+                {
+                  "q": "¿Qué aprende el dragón?",
+                  "options": ["volar", "nadar", "correr"],
+                  "answer": "volar"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "cuentos",
+      "title": "Castillo de los Cuentos",
+      "subtitle": "Lee y comprende",
+      "emoji": "🏰",
+      "theme": "castle",
+      "lessons": [
+        {
+          "id": "m6-l1",
+          "title": "El pato y la luna",
+          "goal": "Leer un cuento corto",
+          "emoji": "🦆",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "El pato y la luna",
+              "pages": [
+                { "text": "El pato nada en el lago.", "emoji": "🦆" },
+                { "text": "Ve la luna en el agua.", "emoji": "🌙" },
+                { "text": "La luna tiembla.", "emoji": "💧" },
+                { "text": "El pato se ríe.", "emoji": "😄" }
+              ],
+              "questions": [
+                {
+                  "q": "¿Dónde nada el pato?",
+                  "options": ["lago", "casa", "carro"],
+                  "answer": "lago"
+                },
+                {
+                  "q": "¿Qué ve el pato?",
+                  "options": ["la luna", "un gato", "un tren"],
+                  "answer": "la luna"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "m6-l2",
+          "title": "Pikachu y el carro rojo",
+          "goal": "Leer y recordar detalles",
+          "emoji": "⚡",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "Pikachu y el carro rojo",
+              "pages": [
+                { "text": "Pikachu tiene un carro rojo.", "emoji": "🚗" },
+                { "text": "El carro va muy rápido.", "emoji": "💨" },
+                { "text": "Pikachu ve una flor.", "emoji": "🌸" },
+                { "text": "Se detiene y la huele.", "emoji": "😊" }
+              ],
+              "questions": [
+                {
+                  "q": "¿De qué color es el carro?",
+                  "options": ["rojo", "azul", "verde"],
+                  "answer": "rojo"
+                },
+                {
+                  "q": "¿Qué ve Pikachu?",
+                  "options": ["una flor", "un pato", "una casa"],
+                  "answer": "una flor"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "m6-l3",
+          "title": "La rana saltarina",
+          "goal": "Leer y comprender",
+          "emoji": "🐸",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "La rana saltarina",
+              "pages": [
+                { "text": "La rana quiere saltar alto.", "emoji": "🐸" },
+                { "text": "Salta y cae.", "emoji": "💦" },
+                { "text": "Lo intenta otra vez.", "emoji": "💪" },
+                { "text": "¡Ahora salta muy alto!", "emoji": "🌟" }
+              ],
+              "questions": [
+                {
+                  "q": "¿Quién quiere saltar?",
+                  "options": ["la rana", "el pato", "el gato"],
+                  "answer": "la rana"
+                },
+                {
+                  "q": "¿Qué hace la rana al final?",
+                  "options": ["salta alto", "duerme", "come"],
+                  "answer": "salta alto"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "m6-l4",
+          "title": "El dragón que no sabía volar",
+          "goal": "Leer un cuento con esfuerzo",
+          "emoji": "🐉",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "El dragón que no sabía volar",
+              "pages": [
+                { "text": "El dragón no sabe volar.", "emoji": "🐉" },
+                { "text": "El dragón mira el cielo.", "emoji": "🐉" },
+                { "text": "Mueve sus alas.", "emoji": "🪽" },
+                { "text": "Cae en la hierba.", "emoji": "🌿" },
+                { "text": "Practica todos los días.", "emoji": "📅" },
+                { "text": "¡Un día vuela!", "emoji": "🎉" }
+              ],
+              "questions": [
+                {
+                  "q": "¿Qué no sabía hacer el dragón?",
+                  "options": ["volar", "nadar", "correr"],
+                  "answer": "volar"
+                },
+                {
+                  "q": "¿Qué hace todos los días?",
+                  "options": ["practicar", "dormir", "comer"],
+                  "answer": "practicar"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "m6-l5",
+          "title": "El tesoro del garaje",
+          "goal": "Leer y recordar la historia",
+          "emoji": "🚙",
+          "activities": [
+            {
+              "id": "a1",
+              "type": "story",
+              "title": "El tesoro del garaje",
+              "pages": [
+                { "text": "El niño entra al garaje.", "emoji": "👦" },
+                { "text": "Ve un carro azul.", "emoji": "🚙" },
+                { "text": "Debajo hay una caja.", "emoji": "📦" },
+                { "text": "¡Es un tesoro de estrellas!", "emoji": "⭐" }
+              ],
+              "questions": [
+                {
+                  "q": "¿Qué ve el niño?",
+                  "options": ["un carro azul", "un pato", "una flor"],
+                  "answer": "un carro azul"
+                },
+                {
+                  "q": "¿Qué hay en la caja?",
+                  "options": ["estrellas", "comida", "ropa"],
+                  "answer": "estrellas"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+services:
+  chispa:
+    build: .
+    container_name: chispa-lectura
+    ports:
+      - "3100:3000"
+    volumes:
+      - ./data:/data
+      - ./content:/app/content:ro
+    environment:
+      - PORT=3000
+      - DB_PATH=/data/lectura.db
+      - TZ=America/Mexico_City
+    restart: unless-stopped
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "fetch('http://localhost:3000/api/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"
+        ]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
