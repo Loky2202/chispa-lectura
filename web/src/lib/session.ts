@@ -47,6 +47,58 @@ export function clearResume(profileId: number) {
   }
 }
 
+// ---------- Tiempo activo ----------
+
+const IDLE_MS = 60 * 1000
+
+export interface ActiveClock {
+  start: () => void
+  stop: () => void
+  reset: (seconds?: number) => void
+  seconds: () => number
+}
+
+/**
+ * Cuenta solo el tiempo en que el niño está de verdad en la lección: se detiene con la
+ * pantalla apagada o la app en segundo plano, y cada pausa sin tocar nada cuenta 1 minuto como máximo.
+ */
+export function createActiveClock(): ActiveClock {
+  let total = 0
+  let last = Date.now()
+  let visible = true
+  const tick = () => {
+    const now = Date.now()
+    if (visible) total += Math.min(now - last, IDLE_MS)
+    last = now
+  }
+  const onVisibility = () => {
+    tick()
+    visible = document.visibilityState === 'visible'
+  }
+  return {
+    start() {
+      visible = document.visibilityState === 'visible'
+      last = Date.now()
+      document.addEventListener('visibilitychange', onVisibility)
+      window.addEventListener('pointerdown', tick, true)
+      window.addEventListener('keydown', tick, true)
+    },
+    stop() {
+      document.removeEventListener('visibilitychange', onVisibility)
+      window.removeEventListener('pointerdown', tick, true)
+      window.removeEventListener('keydown', tick, true)
+    },
+    reset(seconds = 0) {
+      total = seconds * 1000
+      last = Date.now()
+    },
+    seconds() {
+      tick()
+      return Math.round(total / 1000)
+    }
+  }
+}
+
 // ---------- Tiempo diario sugerido ----------
 
 const LIMIT_KEY = 'chispa.dailyMinutes'
@@ -112,14 +164,45 @@ function matches(activity: Activity, trouble: Trouble): boolean {
 export const REVIEW_MIN = 3
 const REVIEW_MAX = 6
 
-/** Arma una sesión corta con lo que el niño ha fallado y todavía no resuelve. */
+function shuffle<T>(list: T[]): T[] {
+  const copy = [...list]
+  for (let i = copy.length - 1; i > 0; i -= 1) {
+    const j = Math.floor(Math.random() * (i + 1))
+    ;[copy[i], copy[j]] = [copy[j], copy[i]]
+  }
+  return copy
+}
+
+/** Misma actividad con las opciones en otro orden, para que no se aprenda la posición. */
+function reshuffled(activity: Activity): Activity {
+  switch (activity.type) {
+    case 'listen_tap':
+    case 'missing_letter':
+      return { ...activity, options: shuffle(activity.options) }
+    case 'word_picture':
+    case 'sentence_picture':
+      return { ...activity, options: shuffle(activity.options) }
+    default:
+      return activity
+  }
+}
+
+/**
+ * Arma una sesión corta con lo que el niño ha fallado y todavía no resuelve.
+ * Si hay varias actividades para lo mismo se elige una al azar, y las opciones se mezclan.
+ */
 export function buildReview(content: World[], trouble: Trouble[]): ReviewItem[] {
   const activities = content.flatMap((world) => world.lessons.flatMap((lesson) => lesson.activities))
   const items: ReviewItem[] = []
   for (const entry of trouble) {
-    const found = activities.find((activity) => matches(activity, entry))
-    if (found) {
-      items.push({ activity: { ...found, id: `r${items.length + 1}` }, kind: entry.kind, item: entry.item })
+    const found = activities.filter((activity) => matches(activity, entry))
+    if (found.length) {
+      const pick = found[Math.floor(Math.random() * found.length)]
+      items.push({
+        activity: { ...reshuffled(pick), id: `r${items.length + 1}` },
+        kind: entry.kind,
+        item: entry.item
+      })
     }
     if (items.length >= REVIEW_MAX) break
   }

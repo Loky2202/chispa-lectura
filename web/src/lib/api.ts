@@ -5,6 +5,7 @@ import type {
   Profile,
   ProgressData,
   Reward,
+  Settings,
   World
 } from '../types'
 
@@ -126,6 +127,10 @@ export const api = {
   parents: () => request<ParentSummary[]>('/api/parents/summary'),
   resetProgress: (profileId: number) =>
     request<{ ok: boolean }>(`/api/profiles/${profileId}/progress`, { method: 'DELETE' }),
+  settings: () => request<Settings>('/api/settings'),
+  saveSettings: (dailyMinutes: number) =>
+    request<Settings>('/api/settings', { method: 'PUT', body: JSON.stringify({ dailyMinutes }) }),
+  audioManifest: () => request<{ id: string; text: string }[]>('/api/audio-manifest'),
   parentStatus: () => request<{ hasPin: boolean; authed: boolean }>('/api/parents/status'),
   parentLogin: async (pin: string) => {
     const result = await request<{ token: string }>('/api/parents/login', {

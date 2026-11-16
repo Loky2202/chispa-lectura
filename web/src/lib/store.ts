@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { api, isPermanent, newRequestId } from './api'
+import { setDailyLimit } from './session'
 import { loadRecordedAudio } from './speech'
 import type {
   CompleteResult,
@@ -145,6 +146,13 @@ export const useStore = create<Store>((set, get) => ({
       writeJson(PROFILES_KEY, profiles)
       set({ content: content.worlds, profiles, rewards })
       void loadRecordedAudio()
+      // El tiempo diario se elige en Padres y vale para todos los dispositivos.
+      void api
+        .settings()
+        .then((settings) => {
+          if (settings.dailyMinutes !== null) setDailyLimit(settings.dailyMinutes)
+        })
+        .catch(() => undefined)
       const saved = Number(localStorage.getItem(PROFILE_KEY))
       if (saved && profiles.some((profile) => profile.id === saved)) {
         await get().selectProfile(saved)

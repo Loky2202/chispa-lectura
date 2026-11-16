@@ -215,22 +215,54 @@ function cleanMistakes(list) {
     .filter((m) => MISTAKE_KINDS.has(m.kind) && m.item)
 }
 
+// Repaso espaciado: tras cada acierto a la primera en un repaso, el elemento vuelve en
+// 1, 3 y 7 días; al acertar también el último, queda resuelto. Si lo vuelve a fallar
+// (en una lección o en un repaso), empieza de nuevo y toca hoy.
+const REVIEW_INTERVALS = [1, 3, 7]
+
 function saveMistakes(profileId, lessonId, list, now) {
   const insert = db.prepare(
     'INSERT INTO mistakes (profile_id, lesson_id, kind, item, chosen, created_at) VALUES (?, ?, ?, ?, ?, ?)'
   )
-  for (const m of list) insert.run(profileId, lessonId, m.kind, m.item, m.chosen, now)
+  const restart = db.prepare(
+    'UPDATE mistakes SET stage = 0, due_at = NULL WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  for (const m of list) {
+    insert.run(profileId, lessonId, m.kind, m.item, m.chosen, now)
+    restart.run(profileId, m.kind, m.item)
+  }
 }
 
-// Lo que todavía no ha resuelto, lo más repetido primero.
+function advanceReview(profileId, solved) {
+  const today = todayStr()
+  const current = db.prepare(
+    `SELECT MAX(stage) AS stage FROM mistakes
+     WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0 AND (due_at IS NULL OR due_at <= ?)`
+  )
+  const schedule = db.prepare(
+    'UPDATE mistakes SET stage = ?, due_at = ? WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  const resolve = db.prepare(
+    'UPDATE mistakes SET resolved = 1 WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  for (const m of solved) {
+    const row = current.get(profileId, m.kind, m.item, today)
+    if (row?.stage == null) continue
+    const stage = row.stage + 1
+    if (stage > REVIEW_INTERVALS.length) resolve.run(profileId, m.kind, m.item)
+    else schedule.run(stage, shiftDay(today, REVIEW_INTERVALS[stage - 1]), profileId, m.kind, m.item)
+  }
+}
+
+// Lo que toca repasar hoy (sin resolver y ya vencido), lo más repetido primero.
 function getTrouble(profileId, limit = 12) {
   return db
     .prepare(
       `SELECT kind, item, COUNT(*) AS count, MAX(created_at) AS last FROM mistakes
-       WHERE profile_id = ? AND resolved = 0
+       WHERE profile_id = ? AND resolved = 0 AND (due_at IS NULL OR due_at <= ?)
        GROUP BY kind, item ORDER BY count DESC, last DESC LIMIT ?`
     )
-    .all(profileId, limit)
+    .all(profileId, todayStr(), limit)
 }
 
 // Para Padres: qué confundió con qué en los últimos 30 días.
@@ -238,7 +270,8 @@ function getConfusions(profileId, limit = 10) {
   const since = new Date(Date.now() - 30 * 86400000).toISOString()
   return db
     .prepare(
-      `SELECT kind, item, chosen, COUNT(*) AS count, MIN(resolved) = 1 AS resolved FROM mistakes
+      `SELECT kind, item, chosen, COUNT(*) AS count, MIN(resolved) = 1 AS resolved,
+              COALESCE(MAX(CASE WHEN resolved = 0 THEN stage END), 0) AS stage FROM mistakes
        WHERE profile_id = ? AND created_at >= ?
        GROUP BY kind, item, chosen ORDER BY count DESC, MAX(created_at) DESC LIMIT ?`
     )
@@ -431,7 +464,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   })
 })
 
-// Repaso de hoy: marca como resuelto lo que respondió bien a la primera y guarda lo que volvió a fallar.
+// Repaso de hoy: lo que respondió bien a la primera avanza en el repaso espaciado; lo que volvió a fallar se guarda.
 app.post('/api/review/complete', async (request, reply) => {
   const body = request.body ?? {}
   const profileId = Number(body.profileId)
@@ -448,10 +481,7 @@ app.post('/api/review/complete', async (request, reply) => {
   db.exec('BEGIN')
   try {
     claimRequest(requestId, now)
-    const resolve = db.prepare(
-      'UPDATE mistakes SET resolved = 1 WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
-    )
-    for (const m of solved) resolve.run(profileId, m.kind, m.item)
+    advanceReview(profileId, solved)
     saveMistakes(profileId, 'repaso', mistakes, now)
     db.prepare('UPDATE profiles SET coins = coins + ? WHERE id = ?').run(coinsEarned, profileId)
     db.prepare(
@@ -476,7 +506,41 @@ app.post('/api/review/complete', async (request, reply) => {
   })
 })
 
+// ---------- Ajustes compartidos entre dispositivos ----------
+const getConfig = (key) => db.prepare('SELECT value FROM config WHERE key = ?').get(key)?.value ?? null
+const setConfig = (key, value) =>
+  db
+    .prepare('INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .run(key, String(value))
+
+function readSettings() {
+  const daily = getConfig('daily_minutes')
+  return { dailyMinutes: daily === null ? null : Number(daily) }
+}
+
+app.get('/api/settings', async () => readSettings())
+
+app.put('/api/settings', parentOnly, async (request, reply) => {
+  const minutes = Number(request.body?.dailyMinutes)
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 180) {
+    return reply.code(400).send({ error: 'Tiempo diario no válido' })
+  }
+  setConfig('daily_minutes', minutes)
+  return readSettings()
+})
+
 // ---------- Voces grabadas ----------
+// Lista de textos que la app dice en voz alta, con su identificador estable (para importar archivos).
+const AUDIO_MANIFEST = path.join(path.dirname(CONTENT_PATH), 'audio/manifest.json')
+
+app.get('/api/audio-manifest', async () => {
+  try {
+    return JSON.parse(fs.readFileSync(AUDIO_MANIFEST, 'utf8'))
+  } catch {
+    return []
+  }
+})
+
 app.addContentTypeParser(/^(audio|video)\//, { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 }, (request, body, done) =>
   done(null, body)
 )

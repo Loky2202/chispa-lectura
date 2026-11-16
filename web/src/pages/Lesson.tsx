@@ -6,6 +6,7 @@ import { IconButton, Modal, ProgressBar, Stars } from '../components/Chrome'
 import {
   buildReview,
   clearResume,
+  createActiveClock,
   reachedDailyLimit,
   readResume,
   saveResume,
@@ -70,7 +71,7 @@ export function LessonPage({ review = false }: { review?: boolean }) {
   const retriesRef = useRef<string[]>([])
   const fixedRef = useRef(0)
   const mistakesRef = useRef<Mistake[]>([])
-  const startRef = useRef(Date.now())
+  const [clock] = useState(createActiveClock)
   const finishedRef = useRef(false)
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export function LessonPage({ review = false }: { review?: boolean }) {
     retriesRef.current = restored ? [...restored.retries] : []
     fixedRef.current = restored?.fixed ?? 0
     mistakesRef.current = restored ? [...restored.mistakes] : []
-    startRef.current = Date.now() - (restored?.elapsed ?? 0) * 1000
+    clock.reset(restored?.elapsed ?? 0)
     finishedRef.current = false
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lessonId])
@@ -106,11 +107,13 @@ export function LessonPage({ review = false }: { review?: boolean }) {
     mistakeSink.current = (mistake) => {
       if (mistakesRef.current.length < 40) mistakesRef.current.push(mistake)
     }
+    clock.start()
     return () => {
       mistakeSink.current = null
+      clock.stop()
       stopSpeaking()
     }
-  }, [])
+  }, [clock])
 
   if (!lesson || (!review && !world) || baseTotal === 0) {
     return (
@@ -131,7 +134,7 @@ export function LessonPage({ review = false }: { review?: boolean }) {
   const isRetry = Boolean(activity?.id.endsWith(RETRY_SUFFIX))
   const nextLesson = world && lessonIndex >= 0 ? world.lessons[lessonIndex + 1] : undefined
   const backTo = review || !world ? '/mapa' : `/mundo/${world.id}`
-  const elapsed = () => Math.round((Date.now() - startRef.current) / 1000)
+  const elapsed = () => clock.seconds()
 
   const finish = async () => {
     if (finishedRef.current) return

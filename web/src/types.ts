@@ -174,6 +174,8 @@ export interface Confusion {
   chosen: string
   count: number
   resolved: boolean
+  /** Aciertos seguidos en el repaso espaciado (0–3) mientras no está resuelto. */
+  stage?: number
 }
 
 export interface Lesson {
@@ -253,6 +255,11 @@ export interface CompleteResult {
   todaySeconds: number
   streak: number
   energy: number
+}
+
+export interface Settings {
+  /** Minutos diarios sugeridos (0 = sin límite); null = todavía no se eligió en el servidor. */
+  dailyMinutes: number | null
 }
 
 export interface ParentSummary {

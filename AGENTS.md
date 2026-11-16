@@ -105,11 +105,17 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
 - Desbloqueo de mundo: `ceil(leccionesDelMundoAnterior * 0.7)` completadas.
 - Cada error se guarda en la tabla `mistakes` (qué debía encontrar y qué tocó). Con
   eso se arma el “Repaso de hoy” (`/repaso`, `lib/session.ts`) y la lista de la zona de
-  Padres. Se marca `resolved` cuando lo acierta a la primera en un repaso.
+  Padres. Repaso espaciado: cada acierto a la primera en un repaso sube `stage` y aleja `due_at`
+  (1, 3 y 7 días); al cuarto acierto queda `resolved`. Un nuevo error lo reinicia. El
+  repaso elige al azar entre las actividades que coinciden y mezcla sus opciones.
 - Una lección a medias se retoma: `chispa.resume.<perfil>` (24 h). El tiempo diario
-  sugerido (`chispa.dailyMinutes`, 15 por defecto) solo invita a descansar, no bloquea.
+  sugerido (15 min por defecto) solo invita a descansar, no bloquea; se guarda en el
+  servidor (`/api/settings`, tabla `config`) y `chispa.dailyMinutes` es su copia local.
+  Los segundos de una lección son tiempo activo (`createActiveClock`): no cuentan con la
+  app en segundo plano y cada pausa sin tocar la pantalla suma 1 minuto como máximo.
 - Voces grabadas: tabla `audio` (clave = texto normalizado) y `/api/audio`. `speak()`
-  usa la grabación si existe y si no la voz del navegador. Grabar exige HTTPS o localhost.
+  usa la grabación si existe y si no la voz del navegador. La grabadora también importa
+  archivos en bloque: el nombre es el texto (`ma.mp3`) o el id de `content/audio/lineas.tsv`. Grabar exige HTTPS o localhost.
 - Offline: claves `chispa.*` en localStorage; lecciones y repasos se encolan en
   `chispa.queue` y se envían al volver `online`. Cada envío lleva un `requestId` y el
   servidor (tabla `requests`) no lo guarda dos veces; un rechazo 4xx se descarta de la cola.

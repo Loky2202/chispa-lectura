@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { parentHeaders } from '../lib/api'
+import { api, parentHeaders } from '../lib/api'
 import { recordingList } from '../lib/session'
 import { audioKey, loadRecordedAudio, speak, stopSpeaking } from '../lib/speech'
 import { useStore } from '../lib/store'
@@ -19,6 +19,8 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
   const [selected, setSelected] = useState<string>('')
   const [phase, setPhase] = useState<Phase>('idle')
   const [error, setError] = useState<string | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<string | null>(null)
   const streamRef = useRef<MediaStream | null>(null)
   const recorderRef = useRef<MediaRecorder | null>(null)
   const stopTimerRef = useRef<number | null>(null)
@@ -119,6 +121,67 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
     await refresh()
   }
 
+  // Importa archivos de audio ya hechos. El nombre del archivo dice a qué texto pertenece:
+  // el identificador de content/audio/lineas.tsv (29e2f8d101fa.mp3) o el texto mismo (ma.mp3).
+  const importFiles = async (files: File[]) => {
+    if (!files.length || importing) return
+    setImporting(true)
+    setImportResult(null)
+    setError(null)
+    const TYPES: Record<string, string> = {
+      mp3: 'audio/mpeg',
+      wav: 'audio/wav',
+      ogg: 'audio/ogg',
+      oga: 'audio/ogg',
+      opus: 'audio/ogg',
+      m4a: 'audio/mp4',
+      aac: 'audio/aac',
+      webm: 'audio/webm'
+    }
+    const byId = new Map<string, string>()
+    const known = new Set(all.map(audioKey))
+    try {
+      for (const line of await api.audioManifest()) {
+        byId.set(line.id, line.text)
+        known.add(audioKey(line.text))
+      }
+    } catch {
+      /* sin manifiesto: solo se reconocen nombres iguales al texto */
+    }
+    let ok = 0
+    const skipped: string[] = []
+    for (const file of files) {
+      const dot = file.name.lastIndexOf('.')
+      const stem = (dot > 0 ? file.name.slice(0, dot) : file.name).normalize('NFC').trim()
+      const extension = dot > 0 ? file.name.slice(dot + 1).toLowerCase() : ''
+      const key = audioKey(byId.get(stem.toLowerCase()) ?? stem)
+      const type = file.type.startsWith('audio/') ? file.type : TYPES[extension]
+      if (!key || !type || !known.has(key) || file.size > 2 * 1024 * 1024) {
+        skipped.push(file.name)
+        continue
+      }
+      try {
+        const response = await fetch(`/api/audio/${encodeURIComponent(key)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': type, ...parentHeaders() },
+          body: file
+        })
+        if (!response.ok) throw new Error('save')
+        ok += 1
+      } catch {
+        skipped.push(file.name)
+      }
+    }
+    await refresh()
+    setImportResult(
+      `Se importaron ${ok} de ${files.length}.` +
+        (skipped.length
+          ? ` No se pudieron usar: ${skipped.slice(0, 6).join(', ')}${skipped.length > 6 ? '…' : ''}`
+          : '')
+    )
+    setImporting(false)
+  }
+
   const done = all.filter(isSaved).length
 
   return (
@@ -164,6 +227,32 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
           {isSaved(selected) ? ' Ya tiene tu voz.' : ' Sin grabación se usa la voz del navegador.'}
         </p>
         {error && <p className="mt-2 text-sm font-bold text-coral">{error}</p>}
+      </div>
+
+      <div className="rounded-[2rem] bg-white/80 p-4">
+        <h3 className="font-display text-lg">📂 Importar archivos de audio</h3>
+        <p className="mt-1 text-sm font-semibold text-ink/60">
+          Si ya tienes los audios hechos, súbelos todos juntos. Cada archivo se llama como su texto (
+          <span className="font-mono text-xs">ma.mp3</span>) o como su identificador de{' '}
+          <span className="font-mono text-xs">content/audio/lineas.tsv</span> (
+          <span className="font-mono text-xs">29e2f8d101fa.mp3</span>). Máximo 2 MB cada uno.
+        </p>
+        <label className={cn('btn btn-white mt-3 h-14 w-full cursor-pointer text-base', importing && 'opacity-60')}>
+          {importing ? 'Importando...' : '📂 Elegir archivos'}
+          <input
+            type="file"
+            accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.opus,.aac"
+            multiple
+            disabled={importing}
+            className="hidden"
+            onChange={(event) => {
+              const files = Array.from(event.target.files ?? [])
+              event.target.value = ''
+              void importFiles(files)
+            }}
+          />
+        </label>
+        {importResult && <p className="mt-2 text-sm font-bold text-ink/70">{importResult}</p>}
       </div>
 
       {groups.map((group) => (

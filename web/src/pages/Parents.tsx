@@ -145,7 +145,17 @@ export function ParentsPage() {
   }
 
   useEffect(() => {
-    if (gate === 'open') void loadSummaries()
+    if (gate !== 'open') return
+    void loadSummaries()
+    // El tiempo diario vive en el servidor: se muestra el valor compartido, no el de este dispositivo.
+    api
+      .settings()
+      .then((settings) => {
+        if (settings.dailyMinutes === null) return
+        setDailyLimit(settings.dailyMinutes)
+        setLimit(getDailyLimit())
+      })
+      .catch(() => undefined)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [gate])
 
@@ -404,13 +414,14 @@ export function ParentsPage() {
                     >
                       <span>{describe(confusion)}</span>
                       <span className="shrink-0 text-xs text-ink/45">
-                        {confusion.count}× {confusion.resolved ? '✅' : ''}
+                        {confusion.count}× {confusion.resolved ? '✅' : confusion.stage ? `🔁 ${confusion.stage}/4` : ''}
                       </span>
                     </li>
                   ))}
                 </ul>
                 <p className="mt-2 text-[11px] font-semibold text-ink/45">
-                  ✅ = ya lo resolvió en un repaso. Lo demás aparece en su “Repaso de hoy”.
+                  🔁 = lo va acertando; vuelve a su “Repaso de hoy” al día siguiente, a los 3 y a los 7 días.
+                  ✅ = lo acertó las 4 veces.
                 </p>
               </div>
             )}
@@ -442,7 +453,7 @@ export function ParentsPage() {
       <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">
         <h2 className="font-display text-lg">⏱️ Tiempo diario sugerido</h2>
         <p className="mt-1 text-sm font-semibold text-ink/60">
-          Al llegar a este tiempo la app invita a descansar (no bloquea). Se guarda en este dispositivo.
+          Al llegar a este tiempo la app invita a descansar (no bloquea). Vale para todos los dispositivos.
         </p>
         <div className="mt-3 grid grid-cols-4 gap-2">
           {DAILY_OPTIONS.map((minutes) => (
@@ -452,6 +463,9 @@ export function ParentsPage() {
               onClick={() => {
                 setDailyLimit(minutes)
                 setLimit(minutes)
+                api.saveSettings(minutes).catch((error) => {
+                  if (!expired(error)) setToast('No se pudo guardar en el servidor')
+                })
               }}
               className={cn('btn h-12 text-sm', dailyLimit === minutes ? 'btn-mint' : 'btn-white')}
             >
