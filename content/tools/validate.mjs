@@ -72,13 +72,13 @@ for (const world of data.worlds) {
       if (!strict) continue
       switch (a.type) {
         case 'listen_tap': for (const o of a.options) if (o.length > 1 || a.options.some((x) => x.length > 1)) checkText(where, o, state); break
-        case 'word_picture': if (a.audio === '') { readingActs++; checkText(where, a.prompt.replace(/^Lee:\s*/, ''), state) } else for (const o of a.options) checkText(where, o.label, state, 'warn'); break
+        case 'word_picture': if (a.audio === '') { readingActs++; checkText(where, a.prompt.replace(/^Lee:\s*/, ''), state) } else if (!a.hideLabels) for (const o of a.options) checkText(where, o.label, state, 'warn'); break
         case 'build_word': checkText(where, a.word, state); break
         case 'blend': checkText(where, a.word, state); break
         case 'learn': if (a.keyword) checkText(where, a.keyword, state); break
         case 'missing_letter': checkText(where, a.word, state); break
         case 'count_syllables': checkText(where, a.word, state); break
-        case 'sentence_picture': readingActs++; checkText(where, a.sentence, state); for (const o of a.options) checkText(where, o.label, state, 'warn'); break
+        case 'sentence_picture': readingActs++; checkText(where, a.sentence, state); if (!a.hideLabels) for (const o of a.options) checkText(where, o.label, state, 'warn'); break
         case 'read_aloud': readingActs++; checkText(where, a.text, state); break
         case 'story': readingActs++; a.pages.forEach((p, i) => checkText(`${where}/p${i + 1}`, p.text, state)); a.questions.forEach((q, i) => { checkText(`${where}/q${i + 1}`, q.q, state, 'warn'); q.options.forEach((o) => checkText(`${where}/q${i + 1}`, o, state, 'warn')) }); break
         case 'odd_one_out': for (const o of a.options) checkText(where, o.label, state, 'warn'); break

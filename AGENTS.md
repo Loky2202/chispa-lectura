@@ -45,14 +45,18 @@ cd web; npm install; npm run dev    # http://localhost:5173
 debe escuchar en 3100. El servidor sirve `web/dist` si existe, así que para probar el
 flujo completo local compila la web antes.
 
-Verificación (no hay tests ni lint; no inventes `npm test`):
+Verificación (no hay lint; las pruebas usan `node:test`, sin dependencias):
 
 ```powershell
-cd web; npm run typecheck; npm run build
-node content/tools/validate.mjs
+cd web; npm run typecheck; npm test; npm run build
+cd server; npm test                        # levanta el servidor con una base temporal
+node --test "content/tools/*.test.mjs"     # motor de sílabas
+node content/tools/validate.mjs            # debe imprimir "Errores: 0 · Avisos: 0"
 ```
 
-No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
+`.github/workflows/ci.yml` corre lo mismo en cada push a `main` y en cada PR, y además
+falla si `content/worlds.json`, `docs/CURRICULO.md` o `content/audio/` no están
+regenerados. Las pruebas del servidor nunca tocan `data/lectura.db`.
 
 ## Cableado
 
@@ -61,7 +65,8 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
   de coches, stickers y medallas fijas; además hay una medalla por mundo completado
   (`mundo-<id>`, se arma desde la tabla `worlds`). Las medallas se ven en el Garaje.
 - `web/src/App.tsx`: rutas. `components/Activities.tsx`: switch de los 14 tipos de
-  actividad. `lib/store.ts`: Zustand + caché en localStorage + cola offline.
+  actividad; cada tipo vive en `components/activities/<Tipo>.tsx` y lo común
+  (`useAnswer`, `Prompt`, `PictureChoices`) en `activities/shared.tsx`. `lib/store.ts`: Zustand + caché en localStorage + cola offline.
   `types.ts`: contrato del contenido.
 - `content/curriculum/index.mjs`: orden de los mundos. `dict.mjs`: palabras con su
   emoji. `silabas.mjs`, `jardin.mjs`, `palabras.mjs`, `frases.mjs`, `montana.mjs`,

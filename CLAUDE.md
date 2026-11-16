@@ -26,7 +26,7 @@ content/curriculum/*.mjs ──build.mjs──▶ content/worlds.json ──seed
 - Un tipo de actividad nuevo (o un campo nuevo) se toca en varios sitios a la vez:
   `content/tools/build.mjs` (lo genera), `content/tools/validate.mjs` (lo valida),
   `content/tools/docs.mjs` (manifiesto de audio), `web/src/types.ts`,
-  `web/src/components/Activities.tsx` (lo dibuja), `web/src/pages/Lesson.tsx` y
+  `web/src/components/activities/<Tipo>.tsx` más el switch de `Activities.tsx` (lo dibuja), `web/src/pages/Lesson.tsx` y
   `web/src/lib/session.ts` (cómo se reintenta y cómo entra al repaso).
 
 ## Escribir una lección

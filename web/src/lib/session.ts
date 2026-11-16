@@ -47,6 +47,13 @@ export function clearResume(profileId: number) {
   }
 }
 
+// ---------- Estrellas ----------
+
+/** 3 = sin errores pendientes, 2 = uno o dos, 1 = completada. Con 1 ya se avanza. */
+export function starsFor(errors: number): number {
+  return errors === 0 ? 3 : errors <= 2 ? 2 : 1
+}
+
 // ---------- Tiempo activo ----------
 
 const IDLE_MS = 60 * 1000

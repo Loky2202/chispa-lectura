@@ -10,6 +10,7 @@ import {
   reachedDailyLimit,
   readResume,
   saveResume,
+  starsFor,
   type ReviewItem
 } from '../lib/session'
 import { sfx } from '../lib/sfx'
@@ -141,7 +142,7 @@ export function LessonPage({ review = false }: { review?: boolean }) {
     finishedRef.current = true
     setSaving(true)
     const errors = failedRef.current.size
-    const stars = errors === 0 ? 3 : errors <= 2 ? 2 : 1
+    const stars = starsFor(errors)
     const seconds = elapsed()
     const previous = useStore.getState().data?.progress[lesson.id]?.stars ?? 0
     setEarnedStars(stars)
