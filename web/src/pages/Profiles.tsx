@@ -3,7 +3,7 @@ import { useState } from 'react'
 import type { FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { LoadingScreen } from '../components/Chrome'
-import { Pikachu } from '../components/Pikachu'
+import { Chispa } from '../components/Chispa'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
@@ -62,7 +62,7 @@ export function ProfilesPage() {
           animate={{ scale: 1, opacity: 1 }}
           transition={{ type: 'spring', stiffness: 160, damping: 16 }}
         >
-          <Pikachu size={170} mood="cheer" bounce />
+          <Chispa size={170} mood="cheer" bounce />
         </motion.div>
         <motion.h1
           className="mt-2 font-display text-4xl leading-tight text-ink sm:text-5xl"

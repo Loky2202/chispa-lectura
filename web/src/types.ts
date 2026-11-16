@@ -16,9 +16,39 @@ export interface WordPicture {
   id: string
   type: 'word_picture'
   prompt: string
+  /** '' = actividad de lectura silenciosa (sin audio automático). */
   audio?: string
+  /** Oculta el texto bajo cada imagen (para no dar la respuesta escrita). */
+  hideLabels?: boolean
+  /** Sílabas de la palabra a leer (se pintan en dos colores). */
+  parts?: string[]
   options: Option[]
   answer: string
+}
+
+/** Presentación de una letra o grupo de sílabas: no tiene respuesta incorrecta. */
+export interface Learn {
+  id: string
+  type: 'learn'
+  letter?: string
+  upper?: string
+  keyword?: string
+  emoji?: string
+  /** Sílaba de la palabra clave que se resalta. */
+  focus?: string
+  parts?: string[]
+  say?: string
+  note?: string
+  syllables: string[]
+}
+
+/** Unir sílabas para formar una palabra: no tiene respuesta incorrecta. */
+export interface Blend {
+  id: string
+  type: 'blend'
+  word: string
+  parts: string[]
+  emoji?: string
 }
 
 export interface CountSyllables {
@@ -45,12 +75,26 @@ export interface BuildWord {
   type: 'build_word'
   word: string
   emoji: string
+  /** Si viene, la palabra se arma con fichas de sílaba en vez de letra por letra. */
+  parts?: string[]
+  /** Fichas de sílaba que sobran (distractores). */
+  extra?: string[]
+}
+
+/** Dibujar la letra con el dedo sobre su silueta: no tiene respuesta incorrecta. */
+export interface Trace {
+  id: string
+  type: 'trace'
+  letter: string
 }
 
 export interface SentencePicture {
   id: string
   type: 'sentence_picture'
   sentence: string
+  /** Pregunta de comprensión que se dice en voz alta (“¿Quién usa la lupa?”). */
+  question?: string
+  hideLabels?: boolean
   options: Option[]
   answer: string
 }
@@ -66,6 +110,8 @@ export interface Memory {
   id: string
   type: 'memory'
   items: string[]
+  /** Parejas distintas que van juntas (mayúscula y minúscula). */
+  pairs?: [string, string][]
 }
 
 export interface Sequence {
@@ -102,6 +148,33 @@ export type Activity =
   | Sequence
   | Story
   | OddOneOut
+  | Learn
+  | Blend
+  | Trace
+
+export type MistakeKind = 'letter' | 'syllable' | 'sight' | 'word-hear' | 'word-read' | 'sentence' | 'vowel'
+
+/** Algo que el niño falló: qué tenía que encontrar y qué eligió. */
+export interface Mistake {
+  kind: MistakeKind
+  item: string
+  chosen: string
+}
+
+export interface Trouble {
+  kind: MistakeKind
+  item: string
+  count: number
+  last: string
+}
+
+export interface Confusion {
+  kind: MistakeKind
+  item: string
+  chosen: string
+  count: number
+  resolved: boolean
+}
 
 export interface Lesson {
   id: string
@@ -152,6 +225,7 @@ export interface ProgressData {
   progress: Record<string, ProgressEntry>
   badges: Badge[]
   unlocks: string[]
+  trouble?: Trouble[]
   lessonsCompleted: number
   totalStars: number
   totalSeconds: number
@@ -194,4 +268,5 @@ export interface ParentSummary {
   streak: number
   energy: number
   lastPlayed: string | null
+  confusions?: Confusion[]
 }

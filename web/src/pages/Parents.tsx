@@ -1,12 +1,30 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Modal, Toast, TopBar } from '../components/Chrome'
-import { Pikachu } from '../components/Pikachu'
+import { Chispa } from '../components/Chispa'
+import { VoiceRecorder } from '../components/VoiceRecorder'
 import { api } from '../lib/api'
+import { DAILY_OPTIONS, getDailyLimit, setDailyLimit } from '../lib/session'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
 import { cn, formatMinutes } from '../lib/utils'
-import type { ParentSummary } from '../types'
+import type { Confusion, ParentSummary } from '../types'
+
+function describe(confusion: Confusion): string {
+  const { kind, item, chosen } = confusion
+  switch (kind) {
+    case 'word-read':
+      return `Leyó “${item}” y tocó el dibujo de “${chosen}”`
+    case 'sentence':
+      return `Frase “${item}”: tocó “${chosen}”`
+    case 'vowel':
+      return `En “${item}” puso la vocal “${chosen}”`
+    case 'sight':
+      return `Palabra mágica “${item}”: tocó “${chosen}”`
+    default:
+      return `Escuchó “${item}” y tocó “${chosen}”`
+  }
+}
 
 type Gate = 'hold' | 'math' | 'open'
 
@@ -21,6 +39,8 @@ export function ParentsPage() {
   const [resetTarget, setResetTarget] = useState<ParentSummary | null>(null)
   const [resetting, setResetting] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
+  const [voices, setVoices] = useState(false)
+  const [dailyLimit, setLimit] = useState(getDailyLimit)
   const intervalRef = useRef<number | null>(null)
 
   const cancelHold = () => {
@@ -98,7 +118,7 @@ export function ParentsPage() {
     return (
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col justify-center px-5 py-8">
         <div className="flex flex-col items-center gap-4 text-center">
-          <Pikachu size={140} mood="thinking" />
+          <Chispa size={140} mood="thinking" />
           <h1 className="font-display text-3xl">Zona de padres</h1>
           <p className="text-sm font-bold text-ink/55">
             Para que los pequeños no cambien nada, confirma que eres un adulto.
@@ -156,6 +176,15 @@ export function ParentsPage() {
             Volver al inicio
           </button>
         </div>
+      </div>
+    )
+  }
+
+  if (voices) {
+    return (
+      <div className="mx-auto flex min-h-dvh w-full max-w-3xl flex-col pb-10">
+        <TopBar title="Grabar voces" subtitle="Tu voz en lugar de la del navegador" onBack={() => setVoices(false)} hideCoins />
+        <VoiceRecorder onClose={() => setVoices(false)} />
       </div>
     )
   }
@@ -220,6 +249,29 @@ export function ParentsPage() {
                 <p className="text-[10px] font-extrabold uppercase text-ink/45">Tiempo</p>
               </div>
             </div>
+            {(summary.confusions?.length ?? 0) > 0 && (
+              <div className="mt-3 rounded-2xl bg-cream/80 p-3">
+                <p className="text-[10px] font-extrabold uppercase text-ink/45">
+                  Lo que más le cuesta (últimos 30 días)
+                </p>
+                <ul className="mt-1 space-y-1">
+                  {summary.confusions?.map((confusion) => (
+                    <li
+                      key={`${confusion.kind}-${confusion.item}-${confusion.chosen}`}
+                      className="flex items-start justify-between gap-2 text-sm font-bold text-ink/70"
+                    >
+                      <span>{describe(confusion)}</span>
+                      <span className="shrink-0 text-xs text-ink/45">
+                        {confusion.count}× {confusion.resolved ? '✅' : ''}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] font-semibold text-ink/45">
+                  ✅ = ya lo resolvió en un repaso. Lo demás aparece en su “Repaso de hoy”.
+                </p>
+              </div>
+            )}
             <div className="mt-2 flex items-center justify-between text-xs font-bold text-ink/50">
               <span>🔥 Racha: {summary.streak} {summary.streak === 1 ? 'día' : 'días'}</span>
               <button
@@ -232,6 +284,39 @@ export function ParentsPage() {
             </div>
           </div>
         ))}
+      </div>
+
+      <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">
+        <h2 className="font-display text-lg">🎙️ Grabar voces</h2>
+        <p className="mt-1 text-sm font-semibold text-ink/60">
+          Graba las sílabas y palabras con tu voz: se entienden mucho mejor que la voz del navegador. Lo que
+          no grabes se sigue oyendo con la voz de siempre.
+        </p>
+        <button type="button" onClick={() => setVoices(true)} className="btn btn-primary mt-3 h-14 w-full text-base">
+          🎙️ Abrir grabadora
+        </button>
+      </div>
+
+      <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">
+        <h2 className="font-display text-lg">⏱️ Tiempo diario sugerido</h2>
+        <p className="mt-1 text-sm font-semibold text-ink/60">
+          Al llegar a este tiempo la app invita a descansar (no bloquea). Se guarda en este dispositivo.
+        </p>
+        <div className="mt-3 grid grid-cols-4 gap-2">
+          {DAILY_OPTIONS.map((minutes) => (
+            <button
+              key={minutes}
+              type="button"
+              onClick={() => {
+                setDailyLimit(minutes)
+                setLimit(minutes)
+              }}
+              className={cn('btn h-12 text-sm', dailyLimit === minutes ? 'btn-mint' : 'btn-white')}
+            >
+              {minutes === 0 ? 'Sin límite' : `${minutes} min`}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">

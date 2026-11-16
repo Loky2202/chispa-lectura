@@ -75,6 +75,28 @@ CREATE TABLE IF NOT EXISTS daily (
   PRIMARY KEY (profile_id, day)
 );
 
+-- Lo que el niño falló: sirve para el "Repaso de hoy" y para la zona de Padres.
+-- resolved = 1 cuando después lo respondió bien a la primera en un repaso.
+CREATE TABLE IF NOT EXISTS mistakes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_id INTEGER NOT NULL,
+  lesson_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  item TEXT NOT NULL,
+  chosen TEXT NOT NULL DEFAULT '',
+  resolved INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
+-- Voces grabadas por la familia (sílabas, palabras). La clave es el texto normalizado.
+CREATE TABLE IF NOT EXISTS audio (
+  key TEXT PRIMARY KEY,
+  mime TEXT NOT NULL,
+  data BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_mistakes_profile ON mistakes(profile_id, resolved);
 CREATE INDEX IF NOT EXISTS idx_progress_profile ON progress(profile_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_profile ON attempts(profile_id);
 CREATE INDEX IF NOT EXISTS idx_daily_profile ON daily(profile_id);

@@ -29,6 +29,20 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api\//],
         runtimeCaching: [
           {
+            // Voces grabadas: la URL cambia (?v=) cuando se vuelve a grabar.
+            urlPattern: /\/api\/audio\/.+/,
+            handler: 'CacheFirst',
+            options: {
+              cacheName: 'chispa-voces',
+              expiration: { maxEntries: 600, maxAgeSeconds: 60 * 60 * 24 * 365 }
+            }
+          },
+          {
+            urlPattern: /\/api\/audio$/,
+            handler: 'NetworkFirst',
+            options: { cacheName: 'chispa-voces-lista' }
+          },
+          {
             urlPattern: /\/api\/content$/,
             handler: 'NetworkFirst',
             options: {

@@ -1,6 +1,6 @@
 # ⚡ La Aventura de Chispa
 
-Web-app para que un niño de 6 años aprenda a leer en español jugando. Tiene 7 mundos, 47 lecciones y 159 minijuegos con voz, sonidos, estrellas, monedas, garaje de coches y medallas.
+Web-app para que un niño de 6 años aprenda a leer en español jugando. Tiene 8 mundos, 72 lecciones y 598 minijuegos con voz, sonidos, estrellas, monedas, garaje de coches y medallas.
 
 Funciona con **Docker**, guarda todo en **SQLite** dentro de un volumen (`./data`) y se puede instalar como app (PWA) en la tablet.
 
@@ -124,12 +124,30 @@ npm run build
 
 ## ✏️ Editar el contenido
 
-Todo el currículo está en **`content/worlds.json`**. Cada mundo tiene lecciones y cada lección una lista de actividades.
+El currículo **se genera**: se escribe en `content/curriculum/` (una lección por entrada, con sus sílabas y palabras) y el build produce `content/worlds.json`. No edites `worlds.json` a mano: se sobrescribe.
+
+```powershell
+node content/tools/build.mjs      # curriculum/ -> content/worlds.json
+node content/tools/validate.mjs   # estructura + decodificabilidad (debe dar "Errores: 0")
+node content/tools/docs.mjs       # docs/CURRICULO.md + content/audio/manifest.json
+```
+
+| Archivo | Para qué sirve |
+| --- | --- |
+| `content/curriculum/index.mjs` | Orden de los mundos |
+| `content/curriculum/dict.mjs` | Palabras con su emoji |
+| `content/curriculum/silabas.mjs` … `cuentos.mjs` | Lecciones de cada mundo |
+| `content/tools/lib.mjs` | Sílabas y decodificabilidad |
+| `content/tools/build.mjs` | Genera las actividades |
+| `content/tools/validate.mjs` | Revisa que todo lo que el niño lee sea decodificable |
 
 Tipos de actividad disponibles:
 
 | Tipo | Qué hace |
 | --- | --- |
+| `learn` | Tarjeta de presentación de una letra (sin error posible) |
+| `blend` | Une sílabas para formar una palabra (sin error posible) |
+| `trace` | Dibuja la letra con el dedo (sin error posible) |
 | `listen_tap` | Suena una sílaba/letra y el niño elige |
 | `word_picture` | Elige la imagen de la palabra |
 | `count_syllables` | Cuenta sílabas con palmadas |
@@ -142,13 +160,13 @@ Tipos de actividad disponibles:
 | `story` | Cuento con preguntas de comprensión |
 | `odd_one_out` | ¿Cuál no pertenece? |
 
-Después de editar el JSON:
+Después de cambiar el currículo y regenerar:
 
 ```powershell
 docker compose restart
 ```
 
-El contenido se vuelve a cargar al arrancar. El progreso de los jugadores no se borra.
+El contenido se vuelve a cargar al arrancar. El progreso de los jugadores no se borra. **Los IDs de lección son la clave del progreso: no los renombres.**
 
 > La carpeta `content/` está montada como volumen de solo lectura en el contenedor, por eso basta con reiniciar. Si cambias **código** (React o servidor), sí necesitas reconstruir:
 >
@@ -164,7 +182,11 @@ El contenido se vuelve a cargar al arrancar. El progreso de los jugadores no se 
 lectura/
 ├─ docker-compose.yml
 ├─ Dockerfile
-├─ content/worlds.json      # currículo completo
+├─ content/
+│  ├─ curriculum/           # fuente del currículo (se edita aquí)
+│  ├─ tools/                # build, validate, docs
+│  └─ worlds.json           # generado
+├─ docs/CURRICULO.md        # generado
 ├─ data/lectura.db          # SQLite (volumen)
 ├─ server/                  # Fastify + node:sqlite + API
 └─ web/                     # React + Vite + Tailwind + PWA
@@ -172,15 +194,11 @@ lectura/
 
 ---
 
-## 🎨 Sobre Pikachu
+## 🎨 Sobre Chispa
 
-El proyecto incluye a **Chispa**, una mascota original dibujada en SVG e inspirada en Pikachu (amarillo, orejas negras, mejillas rojas y cola de rayo), para no incluir imágenes con derechos de autor. Todos los personajes del contenido usan emojis.
-
-Si quieres usar tus propias imágenes de Pikachu:
-
-1. Guárdalas en `web/public/assets/pikachu/`.
-2. Se pueden mostrar en lugar del SVG editando `web/src/components/Pikachu.tsx`.
-3. Vuelve a compilar con `docker compose up -d --build`.
+**Chispa** es la mascota original de la app: una chispita redonda con copete de fuego, dibujada en SVG en
+`web/src/components/Chispa.tsx` (y en `web/public/icon.svg`). No usa personajes ni imágenes de terceros.
+Todos los dibujos del contenido son emojis.
 
 ---
 

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Modal, Toast, TopBar } from '../components/Chrome'
-import { Pikachu } from '../components/Pikachu'
+import { Chispa } from '../components/Chispa'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
@@ -51,7 +51,7 @@ export function GaragePage() {
       <TopBar title="Garaje de Chispa" subtitle="Gana monedas y desbloquea premios" onBack={() => navigate('/mapa')} />
 
       <div className="mx-4 mt-1 flex items-center gap-3 rounded-[2rem] bg-white/80 p-4">
-        <Pikachu size={78} mood="happy" />
+        <Chispa size={78} mood="happy" />
         <div className="min-w-0 flex-1">
           <p className="font-display text-xl">Tu colección</p>
           <p className="text-sm font-bold text-ink/55">

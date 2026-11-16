@@ -1,7 +1,9 @@
 import { create } from 'zustand'
 import { api } from './api'
+import { loadRecordedAudio } from './speech'
 import type {
   CompleteResult,
+  Mistake,
   Profile,
   ProgressData,
   Reward,
@@ -14,6 +16,7 @@ interface CompleteBody {
   correct: number
   total: number
   seconds: number
+  mistakes?: Mistake[]
 }
 
 interface QueuedCompletion {
@@ -39,8 +42,10 @@ interface Store {
     stars: number,
     correct: number,
     total: number,
-    seconds: number
+    seconds: number,
+    mistakes?: Mistake[]
   ) => Promise<CompleteResult>
+  completeReview: (seconds: number, mistakes: Mistake[], solved: Mistake[]) => Promise<CompleteResult>
   unlock: (itemId: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
 }
@@ -115,6 +120,7 @@ export const useStore = create<Store>((set, get) => ({
       writeJson(CONTENT_KEY, content.worlds)
       writeJson(PROFILES_KEY, profiles)
       set({ content: content.worlds, profiles, rewards })
+      void loadRecordedAudio()
       const saved = Number(localStorage.getItem(PROFILE_KEY))
       if (saved && profiles.some((profile) => profile.id === saved)) {
         await get().selectProfile(saved)
@@ -173,14 +179,14 @@ export const useStore = create<Store>((set, get) => ({
     }
   },
 
-  completeLesson: async (lessonId, stars, correct, total, seconds) => {
+  completeLesson: async (lessonId, stars, correct, total, seconds, mistakes = []) => {
     const { profile, data } = get()
     if (!profile) throw new Error('No hay perfil activo')
 
     const previous = data?.progress[lessonId]
     const firstTime = !previous
     const coinsEarned = stars * 5 + (firstTime ? 5 : 0)
-    const body: CompleteBody = { profileId: profile.id, stars, correct, total, seconds }
+    const body: CompleteBody = { profileId: profile.id, stars, correct, total, seconds, mistakes }
 
     try {
       const result = await api.completeLesson(lessonId, body)
@@ -230,6 +236,30 @@ export const useStore = create<Store>((set, get) => ({
         todaySeconds: get().data?.todaySeconds ?? 0,
         streak: get().data?.streak ?? 0,
         energy: get().data?.energy ?? 1
+      }
+    }
+  },
+
+  // El repaso no es una lección: si no hay conexión simplemente no suma monedas.
+  completeReview: async (seconds, mistakes, solved) => {
+    const { profile } = get()
+    if (!profile) throw new Error('No hay perfil activo')
+    try {
+      const result = await api.completeReview({ profileId: profile.id, seconds, mistakes, solved })
+      await get().refresh()
+      return result
+    } catch {
+      const current = get().data
+      return {
+        coinsEarned: 0,
+        totalCoins: current?.profile.coins ?? profile.coins,
+        newBadges: [],
+        lessonsCompleted: current?.lessonsCompleted ?? 0,
+        totalStars: current?.totalStars ?? 0,
+        totalSeconds: current?.totalSeconds ?? 0,
+        todaySeconds: (current?.todaySeconds ?? 0) + seconds,
+        streak: current?.streak ?? 0,
+        energy: current?.energy ?? 1
       }
     }
   },

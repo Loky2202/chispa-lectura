@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion'
 import { useNavigate, useParams } from 'react-router-dom'
 import { ProgressBar, Stars, TopBar } from '../components/Chrome'
-import { Pikachu } from '../components/Pikachu'
+import { Chispa } from '../components/Chispa'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
@@ -18,7 +18,7 @@ export function WorldPage() {
   if (!world) {
     return (
       <div className="mx-auto flex min-h-dvh max-w-2xl flex-col items-center justify-center gap-4 p-6 text-center">
-        <Pikachu size={140} mood="sad" />
+        <Chispa size={140} mood="sad" />
         <h1 className="font-display text-2xl">No encontramos ese mundo</h1>
         <button type="button" onClick={() => navigate('/mapa')} className="btn btn-primary h-14 px-6">
           Volver al mapa

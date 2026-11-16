@@ -79,6 +79,51 @@ function getSummary(profileId) {
   }
 }
 
+const MISTAKE_KINDS = new Set(['letter', 'syllable', 'sight', 'word-hear', 'word-read', 'sentence', 'vowel'])
+
+function cleanMistakes(list) {
+  if (!Array.isArray(list)) return []
+  return list
+    .slice(0, 40)
+    .map((m) => ({
+      kind: String(m?.kind ?? ''),
+      item: String(m?.item ?? '').slice(0, 120),
+      chosen: String(m?.chosen ?? '').slice(0, 120)
+    }))
+    .filter((m) => MISTAKE_KINDS.has(m.kind) && m.item)
+}
+
+function saveMistakes(profileId, lessonId, list, now) {
+  const insert = db.prepare(
+    'INSERT INTO mistakes (profile_id, lesson_id, kind, item, chosen, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+  )
+  for (const m of list) insert.run(profileId, lessonId, m.kind, m.item, m.chosen, now)
+}
+
+// Lo que todavía no ha resuelto, lo más repetido primero.
+function getTrouble(profileId, limit = 12) {
+  return db
+    .prepare(
+      `SELECT kind, item, COUNT(*) AS count, MAX(created_at) AS last FROM mistakes
+       WHERE profile_id = ? AND resolved = 0
+       GROUP BY kind, item ORDER BY count DESC, last DESC LIMIT ?`
+    )
+    .all(profileId, limit)
+}
+
+// Para Padres: qué confundió con qué en los últimos 30 días.
+function getConfusions(profileId, limit = 10) {
+  const since = new Date(Date.now() - 30 * 86400000).toISOString()
+  return db
+    .prepare(
+      `SELECT kind, item, chosen, COUNT(*) AS count, MIN(resolved) = 1 AS resolved FROM mistakes
+       WHERE profile_id = ? AND created_at >= ?
+       GROUP BY kind, item, chosen ORDER BY count DESC, MAX(created_at) DESC LIMIT ?`
+    )
+    .all(profileId, since, limit)
+    .map((row) => ({ ...row, resolved: Boolean(row.resolved) }))
+}
+
 function getProfile(profileId) {
   return db.prepare('SELECT * FROM profiles WHERE id = ?').get(profileId)
 }
@@ -189,6 +234,7 @@ app.get('/api/progress/:profileId', async (request, reply) => {
     progress,
     badges,
     unlocks,
+    trouble: getTrouble(profileId),
     ...getSummary(profileId)
   }
 })
@@ -201,6 +247,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   const correct = Math.max(0, Math.round(Number(body.correct) || 0))
   const total = Math.max(0, Math.round(Number(body.total) || 0))
   const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
+  const mistakes = cleanMistakes(body.mistakes)
 
   if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
   const lesson = db.prepare('SELECT id FROM lessons WHERE id = ?').get(lessonId)
@@ -236,6 +283,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
     db.prepare(
       'INSERT INTO attempts (profile_id, lesson_id, stars, correct, total, seconds, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
     ).run(profileId, lessonId, stars, correct, total, seconds, now)
+    saveMistakes(profileId, lessonId, mistakes, now)
 
     db.exec('COMMIT')
   } catch (error) {
@@ -255,6 +303,80 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
     newBadges,
     ...getSummary(profileId)
   }
+})
+
+// Repaso de hoy: marca como resuelto lo que respondió bien a la primera y guarda lo que volvió a fallar.
+app.post('/api/review/complete', async (request, reply) => {
+  const body = request.body ?? {}
+  const profileId = Number(body.profileId)
+  if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
+  const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
+  const mistakes = cleanMistakes(body.mistakes)
+  const solved = cleanMistakes(body.solved)
+  const coinsEarned = 5
+  const now = new Date().toISOString()
+
+  db.exec('BEGIN')
+  try {
+    const resolve = db.prepare(
+      'UPDATE mistakes SET resolved = 1 WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+    )
+    for (const m of solved) resolve.run(profileId, m.kind, m.item)
+    saveMistakes(profileId, 'repaso', mistakes, now)
+    db.prepare('UPDATE profiles SET coins = coins + ? WHERE id = ?').run(coinsEarned, profileId)
+    db.prepare(
+      `INSERT INTO daily (profile_id, day, seconds, coins) VALUES (?, ?, ?, ?)
+       ON CONFLICT(profile_id, day) DO UPDATE SET
+         seconds = daily.seconds + excluded.seconds,
+         coins = daily.coins + excluded.coins`
+    ).run(profileId, todayStr(), seconds, coinsEarned)
+    db.exec('COMMIT')
+  } catch (error) {
+    db.exec('ROLLBACK')
+    request.log.error(error)
+    return reply.code(500).send({ error: 'No se pudo guardar el repaso' })
+  }
+
+  return { ok: true, coinsEarned, totalCoins: getProfile(profileId).coins, newBadges: [], ...getSummary(profileId) }
+})
+
+// ---------- Voces grabadas ----------
+app.addContentTypeParser(/^(audio|video)\//, { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 }, (request, body, done) =>
+  done(null, body)
+)
+
+const audioKey = (raw) => String(raw ?? '').toLowerCase().normalize('NFC').trim().slice(0, 160)
+
+app.get('/api/audio', async () =>
+  db.prepare('SELECT key, updated_at AS updatedAt FROM audio ORDER BY key').all()
+)
+
+app.get('/api/audio/:key', async (request, reply) => {
+  const row = db.prepare('SELECT mime, data FROM audio WHERE key = ?').get(audioKey(request.params.key))
+  if (!row) return reply.code(404).send({ error: 'Sin grabación' })
+  reply.header('Cache-Control', 'public, max-age=31536000, immutable')
+  reply.type(row.mime)
+  return reply.send(Buffer.from(row.data))
+})
+
+app.put('/api/audio/:key', async (request, reply) => {
+  const key = audioKey(request.params.key)
+  const body = request.body
+  if (!key || !Buffer.isBuffer(body) || body.length < 200) {
+    return reply.code(400).send({ error: 'Grabación vacía' })
+  }
+  const mime = String(request.headers['content-type'] ?? 'audio/webm').slice(0, 80)
+  const updatedAt = new Date().toISOString()
+  db.prepare(
+    `INSERT INTO audio (key, mime, data, updated_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at`
+  ).run(key, mime, body, updatedAt)
+  return { ok: true, key, updatedAt }
+})
+
+app.delete('/api/audio/:key', async (request) => {
+  db.prepare('DELETE FROM audio WHERE key = ?').run(audioKey(request.params.key))
+  return { ok: true }
 })
 
 app.post('/api/rewards/unlock', async (request, reply) => {
@@ -296,7 +418,7 @@ app.get('/api/parents/summary', async () => {
     const last = db
       .prepare('SELECT MAX(completed_at) AS last FROM progress WHERE profile_id = ?')
       .get(profile.id)
-    return { ...profile, ...summary, lastPlayed: last?.last ?? null }
+    return { ...profile, ...summary, lastPlayed: last?.last ?? null, confusions: getConfusions(profile.id) }
   })
 })
 
@@ -310,6 +432,7 @@ app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
     db.prepare('DELETE FROM badges WHERE profile_id = ?').run(profileId)
     db.prepare('DELETE FROM unlocks WHERE profile_id = ?').run(profileId)
     db.prepare('DELETE FROM daily WHERE profile_id = ?').run(profileId)
+    db.prepare('DELETE FROM mistakes WHERE profile_id = ?').run(profileId)
     db.prepare('UPDATE profiles SET coins = 0 WHERE id = ?').run(profileId)
     db.exec('COMMIT')
   } catch (error) {

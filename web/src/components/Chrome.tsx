@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
-import { Pikachu } from './Pikachu'
+import { Chispa } from './Chispa'
 
 export function Backdrop() {
   return (
@@ -136,7 +136,7 @@ export function TopBar({
         </IconButton>
       ) : (
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white/80 shadow-[0_4px_0_rgba(45,49,66,0.08)]">
-          <Pikachu size={38} mood="happy" />
+          <Chispa size={38} mood="happy" />
         </div>
       )}
       <div className="min-w-0 flex-1">
@@ -199,7 +199,7 @@ export function Modal({
 export function LoadingScreen({ message = 'Preparando la aventura...' }: { message?: string }) {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-4 p-6 text-center">
-      <Pikachu size={170} mood="cheer" bounce />
+      <Chispa size={170} mood="cheer" bounce />
       <h1 className="font-display text-2xl">{message}</h1>
       <div className="flex gap-1">
         {[0, 1, 2].map((dot) => (

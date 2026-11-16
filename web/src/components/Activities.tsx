@@ -2,18 +2,23 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import type {
   Activity,
+  Blend,
   BuildWord,
   CountSyllables,
+  Learn,
   ListenTap,
   Memory,
+  Mistake,
   MissingLetter,
   OddOneOut,
   ReadAloud,
   SentencePicture,
   Sequence,
   Story,
+  Trace,
   WordPicture
 } from '../types'
+import { listenKind } from '../lib/session'
 import { sfx } from '../lib/sfx'
 import {
   listenOnce,
@@ -34,11 +39,23 @@ function useSpeakOnMount(texts: string[], delay = 500) {
   }, [key, delay])
 }
 
-function useAnswer(texts: string[], onDone: (perfect: boolean) => void) {
-  const [locked, setLocked] = useState(false)
+/** La lección se suscribe aquí para saber qué falló el niño (y qué eligió). */
+export const mistakeSink: { current: ((mistake: Mistake) => void) | null } = { current: null }
+
+const PAUSE_AFTER_ERROR = 1100
+
+function useAnswer(
+  texts: string[],
+  onDone: (perfect: boolean) => void,
+  track?: Pick<Mistake, 'kind' | 'item'>
+) {
+  const [done, setDone] = useState(false)
+  const [paused, setPaused] = useState(false)
   const [praise, setPraise] = useState<string | null>(null)
+  const [mistakes, setMistakes] = useState(0)
   const mistakesRef = useRef(0)
   const timerRef = useRef<number | null>(null)
+  const pauseRef = useRef<number | null>(null)
   const mountedRef = useRef(true)
 
   useSpeakOnMount(texts)
@@ -48,29 +65,86 @@ function useAnswer(texts: string[], onDone: (perfect: boolean) => void) {
     return () => {
       mountedRef.current = false
       if (timerRef.current) window.clearTimeout(timerRef.current)
+      if (pauseRef.current) window.clearTimeout(pauseRef.current)
     }
   }, [])
 
-  const succeed = (message?: string) => {
-    if (locked || !mountedRef.current) return
-    setLocked(true)
+  // `before`: algo que se dice antes del elogio (la palabra recién armada).
+  const succeed = (message?: string, before?: string) => {
+    if (done || !mountedRef.current) return
+    setDone(true)
     const text = message ?? pick(PRAISE)
     setPraise(text)
     sfx.correct()
-    speak(text)
-    timerRef.current = window.setTimeout(() => {
-      if (mountedRef.current) onDone(mistakesRef.current === 0)
-    }, 1300)
+    speakQueue(before ? [before, text] : [text])
+    timerRef.current = window.setTimeout(
+      () => {
+        if (mountedRef.current) onDone(mistakesRef.current === 0)
+      },
+      before ? 2300 : 1300
+    )
   }
 
-  const fail = () => {
-    if (locked || !mountedRef.current) return
+  // `again`: lo que se repite después del ánimo (el sonido que había que encontrar).
+  // `chosen`: lo que tocó, para saber qué confunde con qué.
+  const fail = (again?: string, chosen?: string) => {
+    if (done || !mountedRef.current) return
     mistakesRef.current += 1
+    setMistakes(mistakesRef.current)
+    if (track) mistakeSink.current?.({ ...track, chosen: chosen ?? '' })
     sfx.wrong()
-    speak(pick(ENCOURAGE))
+    speakQueue(again ? [pick(ENCOURAGE), again] : [pick(ENCOURAGE)])
+    // Pausa corta sin castigo: evita avanzar tocando al azar y da tiempo de escuchar.
+    setPaused(true)
+    if (pauseRef.current) window.clearTimeout(pauseRef.current)
+    pauseRef.current = window.setTimeout(() => {
+      if (mountedRef.current) setPaused(false)
+    }, PAUSE_AFTER_ERROR)
   }
 
-  return { locked, praise, succeed, fail }
+  // Al segundo error la respuesta correcta brilla: el niño siempre termina con éxito.
+  return { locked: done || paused, praise, succeed, fail, reveal: mistakes >= REVEAL_AFTER }
+}
+
+const REVEAL_AFTER = 2
+const REVEAL_CLASS = 'animate-glow ring-4 ring-pika-dark'
+const SYLLABLE_COLORS = ['text-blue-600', 'text-rose-500']
+
+/** Palabra con las sílabas en dos colores: ayuda a ver dónde se parte. */
+function SyllableWord({ parts, className }: { parts: string[]; className?: string }) {
+  return (
+    <span className={cn('font-display', className)}>
+      {parts.map((part, index) => (
+        <span key={`${part}-${index}`} className={SYLLABLE_COLORS[index % 2]}>
+          {part}
+        </span>
+      ))}
+    </span>
+  )
+}
+
+/** Texto en el que cada palabra se puede tocar para escucharla. */
+function TapText({ text, className, active }: { text: string; className?: string; active?: number }) {
+  return (
+    <p className={cn('font-display text-3xl leading-snug sm:text-4xl', className)}>
+      {text.split(' ').map((word, index) => (
+        <button
+          key={`${word}-${index}`}
+          type="button"
+          onClick={() => {
+            sfx.click()
+            speak(word.replace(/[.,!?¡¿]/g, ''), 0.78)
+          }}
+          className={cn(
+            'mr-1 rounded-lg px-1 transition hover:bg-pika/30 active:bg-pika/50',
+            active === index && 'bg-pika/60'
+          )}
+        >
+          {word}
+        </button>
+      ))}
+    </p>
+  )
 }
 
 function PraiseBubble({ text }: { text: string | null }) {
@@ -124,14 +198,16 @@ function PictureChoices({
   disabled,
   onCorrect,
   onWrong,
-  showLabels = true
+  showLabels = true,
+  reveal = false
 }: {
   options: { emoji: string; label: string }[]
   answer: string
   disabled: boolean
   onCorrect: () => void
-  onWrong: () => void
+  onWrong: (label: string) => void
   showLabels?: boolean
+  reveal?: boolean
 }) {
   const [wrong, setWrong] = useState<string | null>(null)
   const [right, setRight] = useState<string | null>(null)
@@ -143,7 +219,7 @@ function PictureChoices({
       onCorrect()
     } else {
       setWrong(label)
-      onWrong()
+      onWrong(label)
       window.setTimeout(() => setWrong(null), 750)
     }
   }
@@ -159,7 +235,8 @@ function PictureChoices({
           className={cn(
             'card flex flex-col items-center gap-1 border-4 border-white p-3 pt-4 transition',
             right === option.label && 'bg-mint/20 ring-4 ring-mint',
-            wrong === option.label && 'animate-shake bg-coral/10 ring-4 ring-coral'
+            wrong === option.label && 'animate-shake bg-coral/10 ring-4 ring-coral',
+            reveal && !right && wrong !== option.label && normalize(option.label) === normalize(answer) && REVEAL_CLASS
           )}
         >
           <span className="text-5xl sm:text-6xl">{option.emoji}</span>
@@ -171,7 +248,13 @@ function PictureChoices({
 }
 
 function ListenTapActivity({ a, onDone }: { a: ListenTap; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer([a.prompt, a.audio], onDone)
+  const { locked, praise, succeed, fail, reveal } = useAnswer([a.prompt, a.audio], onDone, {
+    kind: listenKind(a),
+    item: a.answer
+  })
+  // Sílabas y letras: fichas cuadradas. Palabras: fichas anchas, una debajo de otra.
+  const longest = Math.max(...a.options.map((option) => option.length))
+  const wordy = longest > 3
   const [wrong, setWrong] = useState<string | null>(null)
   const [right, setRight] = useState<string | null>(null)
 
@@ -182,7 +265,7 @@ function ListenTapActivity({ a, onDone }: { a: ListenTap; onDone: (perfect: bool
       succeed()
     } else {
       setWrong(option)
-      fail()
+      fail(a.audio, option)
       window.setTimeout(() => setWrong(null), 750)
     }
   }
@@ -190,7 +273,7 @@ function ListenTapActivity({ a, onDone }: { a: ListenTap; onDone: (perfect: bool
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-7">
       <Prompt text={a.prompt} onSpeak={() => speak(a.audio, 0.8)} />
-      <div className="grid w-full max-w-lg grid-cols-3 gap-3">
+      <div className={cn('grid w-full gap-3', wordy ? 'max-w-md grid-cols-1' : 'max-w-lg grid-cols-3')}>
         {a.options.map((option) => (
           <motion.button
             key={option}
@@ -198,9 +281,11 @@ function ListenTapActivity({ a, onDone }: { a: ListenTap; onDone: (perfect: bool
             whileTap={{ scale: 0.93 }}
             onClick={() => choose(option)}
             className={cn(
-              'card flex aspect-square items-center justify-center border-4 border-white font-display text-5xl uppercase transition sm:text-6xl',
+              'card flex items-center justify-center border-4 border-white font-display transition',
+              wordy ? (longest > 7 ? 'h-20 px-4 text-4xl' : 'h-20 px-4 text-5xl') : 'aspect-square text-5xl sm:text-6xl',
               right === option && 'bg-mint/25 ring-4 ring-mint',
-              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral'
+              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral',
+              reveal && !right && wrong !== option && normalize(option) === normalize(a.answer) && REVEAL_CLASS
             )}
           >
             {option}
@@ -213,16 +298,52 @@ function ListenTapActivity({ a, onDone }: { a: ListenTap; onDone: (perfect: bool
 }
 
 function WordPictureActivity({ a, onDone }: { a: WordPicture; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer([a.audio ?? a.prompt], onDone)
+  // audio === '' → el niño debe leer; el audio solo aparece como ayuda tras un error.
+  const silent = a.audio === ''
+  // La voz solo dice la instrucción (el niño todavía no puede leerla); la palabra la lee él.
+  const { locked, praise, succeed, fail, reveal } = useAnswer(
+    silent ? ['Lee la palabra y toca su dibujo.'] : [a.audio ?? a.prompt],
+    onDone,
+    silent ? { kind: 'word-read', item: a.answer } : undefined
+  )
+  const [hint, setHint] = useState(false)
+  const parts = a.parts?.length ? a.parts : [a.answer]
+  // Ayuda: la palabra sílaba por sílaba y después completa (modela cómo se unen).
+  const help = () => speakQueue(parts.length > 1 ? [...parts, a.answer] : [a.answer], 0.75)
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-7">
-      <Prompt text={a.prompt} onSpeak={() => speak(a.audio ?? a.prompt)} />
+      {silent ? (
+        <div className="flex flex-col items-center gap-3">
+          <div className="card border-4 border-white px-8 py-5">
+            <SyllableWord parts={parts} className="text-6xl sm:text-7xl" />
+          </div>
+          {hint && (
+            <button
+              type="button"
+              onClick={() => {
+                sfx.click()
+                help()
+              }}
+              className="btn btn-white animate-pop h-12 gap-2 px-5 text-sm"
+            >
+              🔊 Ayuda
+            </button>
+          )}
+        </div>
+      ) : (
+        <Prompt text={a.prompt} onSpeak={() => speak(a.audio ?? a.prompt)} />
+      )}
       <PictureChoices
         options={a.options}
         answer={a.answer}
         disabled={locked}
         onCorrect={succeed}
-        onWrong={fail}
+        onWrong={(label) => {
+          setHint(true)
+          fail(undefined, label)
+        }}
+        showLabels={!a.hideLabels}
+        reveal={reveal}
       />
       <PraiseBubble text={praise} />
     </div>
@@ -230,7 +351,7 @@ function WordPictureActivity({ a, onDone }: { a: WordPicture; onDone: (perfect: 
 }
 
 function CountSyllablesActivity({ a, onDone }: { a: CountSyllables; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer(
+  const { locked, praise, succeed, fail, reveal } = useAnswer(
     [a.word, '¿Cuántas sílabas tiene?'],
     onDone
   )
@@ -276,7 +397,8 @@ function CountSyllablesActivity({ a, onDone }: { a: CountSyllables; onDone: (per
             className={cn(
               'card flex h-20 w-20 items-center justify-center border-4 border-white font-display text-4xl',
               right === option && 'bg-mint/25 ring-4 ring-mint',
-              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral'
+              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral',
+              reveal && right === null && wrong !== option && option === a.answer && REVEAL_CLASS
             )}
           >
             {option}
@@ -296,7 +418,10 @@ function CountSyllablesActivity({ a, onDone }: { a: CountSyllables; onDone: (per
 }
 
 function MissingLetterActivity({ a, onDone }: { a: MissingLetter; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer(['¿Qué vocal falta?', a.word], onDone)
+  const { locked, praise, succeed, fail, reveal } = useAnswer(['¿Qué vocal falta?', a.word], onDone, {
+    kind: 'vowel',
+    item: a.word
+  })
   const [wrong, setWrong] = useState<string | null>(null)
   const [right, setRight] = useState<string | null>(null)
 
@@ -307,7 +432,7 @@ function MissingLetterActivity({ a, onDone }: { a: MissingLetter; onDone: (perfe
       succeed()
     } else {
       setWrong(option)
-      fail()
+      fail(a.word, option)
       window.setTimeout(() => setWrong(null), 750)
     }
   }
@@ -341,9 +466,10 @@ function MissingLetterActivity({ a, onDone }: { a: MissingLetter; onDone: (perfe
             whileTap={{ scale: 0.93 }}
             onClick={() => choose(option)}
             className={cn(
-              'card flex h-20 w-20 items-center justify-center border-4 border-white font-display text-4xl uppercase',
+              'card flex h-20 w-20 items-center justify-center border-4 border-white font-display text-4xl',
               right === option && 'bg-mint/25 ring-4 ring-mint',
-              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral'
+              wrong === option && 'animate-shake bg-coral/10 ring-4 ring-coral',
+              reveal && !right && wrong !== option && normalize(option) === normalize(a.answer) && REVEAL_CLASS
             )}
           >
             {option}
@@ -356,32 +482,47 @@ function MissingLetterActivity({ a, onDone }: { a: MissingLetter; onDone: (perfe
 }
 
 function BuildWordActivity({ a, onDone }: { a: BuildWord; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer([a.word], onDone)
-  const letters = useMemo(
-    () => shuffle(a.word.split('').map((letter, index) => ({ letter, index }))),
-    [a.word]
+  // Mientras aprende sílabas, la palabra se arma con fichas de sílaba (más una que sobra).
+  const bySyllable = Boolean(a.parts?.length)
+  const { locked, praise, succeed, fail, reveal } = useAnswer(
+    bySyllable ? ['Arma la palabra.', a.word] : [a.word],
+    onDone
+  )
+  const expected = useMemo(() => (a.parts?.length ? a.parts : a.word.split('')), [a.parts, a.word])
+  const tiles = useMemo(
+    () =>
+      shuffle(
+        [...expected, ...(a.parts?.length ? (a.extra ?? []) : [])].map((text, index) => ({ text, index }))
+      ),
+    [expected, a.parts, a.extra]
   )
   const [placed, setPlaced] = useState<number[]>([])
   const [wrongTile, setWrongTile] = useState<number | null>(null)
-  const expected = a.word.split('')
+  // Tras dos errores brilla la ficha que sigue.
+  const nextTile = reveal
+    ? tiles.find(
+        (tile) =>
+          !placed.includes(tile.index) &&
+          normalize(tile.text) === normalize(expected[placed.length] ?? '')
+      )?.index
+    : undefined
 
-  const tap = (tile: { letter: string; index: number }) => {
+  const tap = (tile: { text: string; index: number }) => {
     if (locked || placed.includes(tile.index)) return
-    const nextLetter = expected[placed.length]
-    if (normalize(tile.letter) === normalize(nextLetter)) {
+    if (normalize(tile.text) === normalize(expected[placed.length])) {
       const next = [...placed, tile.index]
       setPlaced(next)
       sfx.pop()
-      if (next.length === expected.length) {
-        speak(a.word, 0.8)
-        succeed()
-      }
+      if (next.length === expected.length) succeed(undefined, a.word)
+      else if (bySyllable) speak(expected[placed.length], 0.75)
     } else {
       setWrongTile(tile.index)
       fail()
       window.setTimeout(() => setWrongTile(null), 650)
     }
   }
+
+  const box = bySyllable ? 'h-20 min-w-20 px-3 text-4xl' : 'h-16 w-14 text-3xl'
 
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-6">
@@ -398,23 +539,24 @@ function BuildWordActivity({ a, onDone }: { a: BuildWord; onDone: (perfect: bool
       </button>
 
       <div className="flex flex-wrap justify-center gap-2">
-        {expected.map((letter, index) => (
+        {expected.map((text, index) => (
           <div
             key={index}
             className={cn(
-              'flex h-16 w-14 items-center justify-center rounded-2xl border-4 font-display text-3xl',
+              'flex items-center justify-center rounded-2xl border-4 font-display',
+              box,
               index < placed.length
-                ? 'border-mint bg-mint/20'
+                ? cn('border-mint bg-mint/20', bySyllable && SYLLABLE_COLORS[index % 2])
                 : 'border-dashed border-ink/25 bg-white/60'
             )}
           >
-            {index < placed.length ? expected[index] : ''}
+            {index < placed.length ? text : ''}
           </div>
         ))}
       </div>
 
       <div className="flex max-w-lg flex-wrap justify-center gap-2">
-        {letters.map((tile) => {
+        {tiles.map((tile) => {
           const used = placed.includes(tile.index)
           return (
             <motion.button
@@ -424,12 +566,14 @@ function BuildWordActivity({ a, onDone }: { a: BuildWord; onDone: (perfect: bool
               onClick={() => tap(tile)}
               disabled={used}
               className={cn(
-                'card flex h-16 w-14 items-center justify-center border-4 border-white font-display text-3xl uppercase transition',
+                'card flex items-center justify-center border-4 border-white font-display transition',
+                box,
                 used && 'opacity-25',
+                nextTile === tile.index && wrongTile !== tile.index && REVEAL_CLASS,
                 wrongTile === tile.index && 'animate-shake bg-coral/15 ring-4 ring-coral'
               )}
             >
-              {tile.letter}
+              {tile.text}
             </motion.button>
           )
         })}
@@ -446,11 +590,17 @@ function SentencePictureActivity({
   a: SentencePicture
   onDone: (perfect: boolean) => void
 }) {
-  const { locked, praise, succeed, fail } = useAnswer([a.sentence], onDone)
+  // La voz solo dice la instrucción: el niño lee la frase y escucha solo si lo pide
+  // (toda la frase con el botón, o una palabra tocándola).
+  const { locked, praise, succeed, fail, reveal } = useAnswer(
+    a.question ? ['Lee la frase.', a.question] : ['Lee la frase y toca el dibujo.'],
+    onDone,
+    { kind: 'sentence', item: a.sentence }
+  )
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-6">
       <div className="card max-w-2xl border-4 border-white px-6 py-5 text-center">
-        <p className="font-display text-3xl leading-snug sm:text-4xl">{a.sentence}</p>
+        <TapText text={a.sentence} />
         <button
           type="button"
           onClick={() => {
@@ -462,13 +612,28 @@ function SentencePictureActivity({
           🔊 Escuchar
         </button>
       </div>
-      <p className="text-sm font-bold text-ink/60">¿De qué habla la frase?</p>
+      {a.question ? (
+        <button
+          type="button"
+          onClick={() => {
+            sfx.click()
+            speak(a.question ?? '')
+          }}
+          className="flex items-center gap-2 rounded-full bg-white/80 px-5 py-2 font-display text-xl"
+        >
+          🔊 {a.question}
+        </button>
+      ) : (
+        <p className="text-sm font-bold text-ink/60">¿De qué habla la frase?</p>
+      )}
       <PictureChoices
         options={a.options}
         answer={a.answer}
         disabled={locked}
         onCorrect={succeed}
-        onWrong={fail}
+        onWrong={(label) => fail(undefined, label)}
+        showLabels={!a.hideLabels}
+        reveal={reveal}
       />
       <PraiseBubble text={praise} />
     </div>
@@ -476,16 +641,17 @@ function SentencePictureActivity({
 }
 
 function ReadAloudActivity({ a, onDone }: { a: ReadAloud; onDone: (perfect: boolean) => void }) {
-  const [status, setStatus] = useState<'idle' | 'listening' | 'heard' | 'error'>('idle')
-  const [transcript, setTranscript] = useState('')
+  const [status, setStatus] = useState<'idle' | 'listening' | 'again' | 'error'>('idle')
+  const [active, setActive] = useState(-1)
   const [praise, setPraise] = useState<string | null>(null)
   const handleRef = useRef<RecognitionHandle | null>(null)
   const doneRef = useRef(false)
   const listenTimerRef = useRef<number | null>(null)
   const doneTimerRef = useRef<number | null>(null)
   const supported = speechRecognitionAvailable()
+  const words = a.text.split(' ')
 
-  useSpeakOnMount([a.text], 700)
+  useSpeakOnMount(['Lee la frase en voz alta.'])
 
   useEffect(() => {
     return () => {
@@ -504,6 +670,7 @@ function ReadAloudActivity({ a, onDone }: { a: ReadAloud; onDone: (perfect: bool
       listenTimerRef.current = null
     }
     handleRef.current?.stop()
+    setActive(-1)
     const text = message ?? pick(PRAISE)
     setPraise(text)
     sfx.correct()
@@ -511,38 +678,45 @@ function ReadAloudActivity({ a, onDone }: { a: ReadAloud; onDone: (perfect: bool
     doneTimerRef.current = window.setTimeout(() => onDone(true), 1400)
   }
 
-  const start = () => {
+  // Lectura en eco: la voz la lee palabra por palabra (se van iluminando) y luego completa.
+  const echo = () => {
+    if (doneRef.current) return
+    handleRef.current?.stop()
+    setStatus('idle')
+    sfx.click()
+    speakQueue(
+      ['Vamos a leerla juntos.', ...words.map((word) => word.replace(/[.,!?¡¿]/g, '')), a.text, 'Ahora tú.'],
+      0.78,
+      (index) => setActive(index >= 1 && index <= words.length ? index - 1 : -1)
+    )
+  }
+
+  const listen = () => {
     if (!supported || doneRef.current) return
     if (listenTimerRef.current) {
       window.clearTimeout(listenTimerRef.current)
       listenTimerRef.current = null
     }
     stopSpeaking()
-    setTranscript('')
+    setActive(-1)
     setStatus('listening')
     sfx.click()
     handleRef.current = listenOnce(
       (heard) => {
-        setTranscript(heard)
         const target = normalize(a.text)
         const spoken = normalize(heard)
-        const words = target.split(' ').filter((word) => word.length > 2)
-        const matches = words.filter((word) => spoken.includes(word)).length
-        const enough = spoken.includes(target) || (words.length > 0 && matches >= Math.ceil(words.length * 0.6))
+        const long = target.split(' ').filter((word) => word.length > 2)
+        const matches = long.filter((word) => spoken.includes(word)).length
+        const enough = spoken.includes(target) || (long.length > 0 && matches >= Math.ceil(long.length * 0.6))
         if (enough) {
           finish('¡Leíste muy bien!')
         } else {
-          setStatus('heard')
+          setStatus('again')
           speak('Casi. Intenta otra vez.', 0.9)
         }
       },
-      (error) => {
-        setStatus('error')
-        speak(error === 'not-allowed' ? 'Necesito permiso para escucharte.' : 'No pude escucharte.')
-      },
-      () => {
-        setStatus((current) => (current === 'listening' ? 'idle' : current))
-      }
+      () => setStatus('error'),
+      () => setStatus((current) => (current === 'listening' ? 'idle' : current))
     )
     listenTimerRef.current = window.setTimeout(() => handleRef.current?.stop(), 9000)
   }
@@ -551,66 +725,31 @@ function ReadAloudActivity({ a, onDone }: { a: ReadAloud; onDone: (perfect: bool
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-6">
       <div className="card flex max-w-2xl flex-col items-center gap-3 border-4 border-white px-6 py-6 text-center">
         <span className="text-6xl">{a.emoji ?? '📖'}</span>
-        <p className="font-display text-3xl leading-snug sm:text-4xl">{a.text}</p>
-        <button
-          type="button"
-          onClick={() => {
-            sfx.click()
-            speak(a.text, 0.82)
-          }}
-          className="btn btn-white h-11 gap-2 px-4 text-sm"
-        >
-          🔊 Escuchar
-        </button>
+        <TapText text={a.text} active={active} />
       </div>
 
-      {supported ? (
-        <>
-          <p className="text-center text-sm font-bold text-ink/60">
-            Toca el micrófono y lee la frase en voz alta.
-          </p>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <button
-              type="button"
-              onClick={start}
-              disabled={status === 'listening' || doneRef.current}
-              className={cn(
-                'btn btn-primary h-16 gap-3 px-7 text-lg',
-                status === 'listening' && 'animate-glow'
-              )}
-            >
-              🎤 {status === 'listening' ? 'Te escucho...' : 'Leer'}
-            </button>
-            <button
-              type="button"
-              onClick={() => finish()}
-              className="btn btn-white h-14 px-5 text-base"
-            >
-              Ya leí
-            </button>
-          </div>
-          {status === 'heard' && (
-            <div className="animate-pop rounded-2xl bg-white/90 px-5 py-3 text-center text-sm font-bold">
-              Escuché: <span className="text-coral">“{transcript}”</span>
-              <br />
-              ¡Intenta otra vez!
-            </div>
-          )}
-          {status === 'error' && (
-            <div className="rounded-2xl bg-coral/10 px-5 py-3 text-center text-sm font-bold text-coral">
-              No pude escucharte. Puedes tocar “Ya leí”.
-            </div>
-          )}
-        </>
-      ) : (
-        <>
-          <div className="rounded-2xl bg-white/80 px-5 py-3 text-center text-sm font-bold text-ink/60">
-            Este dispositivo no puede escuchar. Lee en voz alta y toca “Ya leí”.
-          </div>
-          <button type="button" onClick={() => finish()} className="btn btn-primary h-16 px-8 text-lg">
-            ✅ Ya leí
+      <div className="flex w-full max-w-md flex-col items-stretch gap-3">
+        <button type="button" onClick={() => finish()} className="btn btn-primary h-16 gap-2 px-7 text-xl">
+          👍 ¡Ya la leí!
+        </button>
+        <button type="button" onClick={echo} className="btn btn-white h-14 gap-2 px-5 text-base">
+          🤝 Leámosla juntos
+        </button>
+        {supported && (
+          <button
+            type="button"
+            onClick={listen}
+            disabled={status === 'listening'}
+            className={cn('btn btn-white h-14 gap-2 px-5 text-base', status === 'listening' && 'animate-glow')}
+          >
+            🎤 {status === 'listening' ? 'Te escucho...' : 'Que me escuche Chispa'}
           </button>
-        </>
+        )}
+      </div>
+
+      {status === 'again' && <div className="animate-pop text-4xl">💪 🔁</div>}
+      {status === 'error' && (
+        <p className="text-center text-xs font-bold text-ink/45">El micrófono no está disponible ahora.</p>
       )}
       <PraiseBubble text={praise} />
     </div>
@@ -618,11 +757,20 @@ function ReadAloudActivity({ a, onDone }: { a: ReadAloud; onDone: (perfect: bool
 }
 
 function MemoryActivity({ a, onDone }: { a: Memory; onDone: (perfect: boolean) => void }) {
+  // Con `pairs` se juntan dos cartas distintas (M con m); sin él, dos cartas iguales.
   const cards = useMemo(
     () =>
-      shuffle([...a.items, ...a.items].map((item, index) => ({ id: index, item }))),
-    [a.items]
+      shuffle(
+        a.pairs?.length
+          ? a.pairs.flatMap((pair, index) => pair.map((item) => ({ item, pair: index })))
+          : a.items.flatMap((item, index) => [
+              { item, pair: index },
+              { item, pair: index }
+            ])
+      ).map((card, index) => ({ ...card, id: index })),
+    [a.items, a.pairs]
   )
+  const instruction = a.pairs?.length ? 'Junta la mayúscula con su minúscula.' : 'Encuentra las parejas iguales'
   const [flipped, setFlipped] = useState<number[]>([])
   const [matched, setMatched] = useState<Set<number>>(new Set())
   const [busy, setBusy] = useState(false)
@@ -630,7 +778,7 @@ function MemoryActivity({ a, onDone }: { a: Memory; onDone: (perfect: boolean) =
   const mistakesRef = useRef(0)
   const finishedRef = useRef(false)
 
-  useSpeakOnMount(['Encuentra las parejas iguales'])
+  useSpeakOnMount([instruction])
 
   useEffect(() => {
     if (cards.length > 0 && matched.size === cards.length && !finishedRef.current) {
@@ -655,7 +803,7 @@ function MemoryActivity({ a, onDone }: { a: Memory; onDone: (perfect: boolean) =
     const secondCard = cards.find((card) => card.id === second)
     setBusy(true)
 
-    if (firstCard && secondCard && firstCard.item === secondCard.item) {
+    if (firstCard && secondCard && firstCard.pair === secondCard.pair) {
       window.setTimeout(() => {
         setMatched((current) => {
           const copy = new Set(current)
@@ -679,7 +827,9 @@ function MemoryActivity({ a, onDone }: { a: Memory; onDone: (perfect: boolean) =
 
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-5">
-      <h2 className="font-display text-2xl">Encuentra las parejas</h2>
+      <h2 className="text-center font-display text-2xl">
+        {a.pairs?.length ? 'Junta la mayúscula con su minúscula' : 'Encuentra las parejas'}
+      </h2>
       <div className="grid w-full max-w-lg grid-cols-4 gap-2 sm:gap-3">
         {cards.map((card) => {
           const open = flipped.includes(card.id) || matched.has(card.id)
@@ -866,10 +1016,6 @@ function StoryActivity({ a, onDone }: { a: Story; onDone: (perfect: boolean) => 
   const currentQuestion = a.questions[question]
 
   useEffect(() => {
-    if (mode === 'read' && currentPage) {
-      const timer = window.setTimeout(() => speak(currentPage.text, 0.82), 450)
-      return () => window.clearTimeout(timer)
-    }
     if (mode === 'quiz' && currentQuestion) {
       const timer = window.setTimeout(
         () => speakQueue([currentQuestion.q, ...currentQuestion.options]),
@@ -935,21 +1081,7 @@ function StoryActivity({ a, onDone }: { a: Story; onDone: (perfect: boolean) => 
           </div>
           <div className="card flex w-full max-w-2xl flex-col items-center gap-3 border-4 border-white px-6 py-7 text-center">
             <span className="text-7xl">{currentPage.emoji}</span>
-            <p className="font-display text-3xl leading-snug sm:text-4xl">
-              {currentPage.text.split(' ').map((word, index) => (
-                <button
-                  key={`${word}-${index}`}
-                  type="button"
-                  onClick={() => {
-                    sfx.click()
-                    speak(word.replace(/[.,!?¡¿]/g, ''), 0.78)
-                  }}
-                  className="mr-1 rounded-lg px-1 transition hover:bg-pika/30 active:bg-pika/50"
-                >
-                  {word}
-                </button>
-              ))}
-            </p>
+            <TapText text={currentPage.text} />
             <button
               type="button"
               onClick={() => {
@@ -998,7 +1130,7 @@ function StoryActivity({ a, onDone }: { a: Story; onDone: (perfect: boolean) => 
 }
 
 function OddOneOutActivity({ a, onDone }: { a: OddOneOut; onDone: (perfect: boolean) => void }) {
-  const { locked, praise, succeed, fail } = useAnswer([a.prompt], onDone)
+  const { locked, praise, succeed, fail, reveal } = useAnswer([a.prompt], onDone)
   return (
     <div className="flex w-full flex-1 flex-col items-center justify-center gap-7">
       <Prompt text={a.prompt} onSpeak={() => speak(a.prompt)} />
@@ -1007,8 +1139,340 @@ function OddOneOutActivity({ a, onDone }: { a: OddOneOut; onDone: (perfect: bool
         answer={a.answer}
         disabled={locked}
         onCorrect={succeed}
-        onWrong={fail}
+        onWrong={() => fail()}
+        reveal={reveal}
       />
+      <PraiseBubble text={praise} />
+    </div>
+  )
+}
+
+/** Presentación de una letra: el niño toca cada sílaba para escucharla. No hay errores. */
+function LearnActivity({ a, onDone }: { a: Learn; onDone: (perfect: boolean) => void }) {
+  const [heard, setHeard] = useState<Set<string>>(new Set())
+  const allHeard = heard.size >= a.syllables.length
+  const single = a.syllables.length === 1
+  const hint = single ? 'Toca la letra para escucharla.' : 'Toca cada sílaba para escucharla.'
+  const intro = [a.say, a.note, hint].filter((text): text is string => Boolean(text))
+
+  useSpeakOnMount(intro, 600)
+
+  const tap = (syllable: string) => {
+    sfx.pop()
+    speak(syllable, 0.72)
+    setHeard((current) => new Set(current).add(syllable))
+  }
+
+  return (
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-6">
+      <div className="card flex w-full max-w-xl flex-col items-center gap-3 border-4 border-white px-6 py-6 text-center">
+        <span className="rounded-full bg-pika/40 px-4 py-1 text-xs font-extrabold uppercase tracking-wide text-ink/60">
+          {a.letter ? 'Letra nueva' : 'Sílabas nuevas'}
+        </span>
+        <div className="flex items-center justify-center gap-6">
+          {a.letter && (
+            <span className="font-display text-7xl leading-none text-blue-600 sm:text-8xl">
+              {a.upper && a.upper !== a.letter ? `${a.upper} ${a.letter}` : a.letter}
+            </span>
+          )}
+          {a.keyword && (
+            <button
+              type="button"
+              onClick={() => {
+                sfx.click()
+                speakQueue(intro.slice(0, -1).length ? intro.slice(0, -1) : [a.keyword ?? ''])
+              }}
+              className="flex flex-col items-center gap-1 rounded-3xl px-3 py-2 transition active:bg-pika/30"
+              aria-label="Escuchar otra vez"
+            >
+              <span className="text-6xl sm:text-7xl">{a.emoji}</span>
+              <span className="font-display text-3xl">
+                {(a.parts?.length ? a.parts : [a.keyword]).map((part, index) => (
+                  <span key={`${part}-${index}`} className={part === a.focus ? 'text-rose-500' : 'text-ink'}>
+                    {part}
+                  </span>
+                ))}
+              </span>
+            </button>
+          )}
+        </div>
+        {a.note && <p className="text-sm font-bold text-ink/60">{a.note}</p>}
+      </div>
+
+      <p className="text-center text-sm font-bold text-ink/60">👆 {hint.replace('.', '')}</p>
+      <div className="flex max-w-xl flex-wrap justify-center gap-3">
+        {a.syllables.map((syllable) => (
+          <motion.button
+            key={syllable}
+            type="button"
+            whileTap={{ scale: 0.92 }}
+            onClick={() => tap(syllable)}
+            className={cn(
+              'card flex h-24 min-w-24 items-center justify-center border-4 border-white px-4 font-display text-5xl transition',
+              heard.has(syllable) ? 'bg-mint/25 ring-4 ring-mint' : 'animate-glow'
+            )}
+          >
+            {syllable}
+          </motion.button>
+        ))}
+      </div>
+
+      <button
+        type="button"
+        disabled={!allHeard}
+        onClick={() => {
+          sfx.correct()
+          onDone(true)
+        }}
+        className={cn('btn btn-primary h-16 px-10 text-lg', allHeard && 'animate-pop')}
+      >
+        ¡Listo! ➡️
+      </button>
+    </div>
+  )
+}
+
+/** Unir sílabas: toca cada sílaba en orden y se juntan en la palabra. No hay errores. */
+function BlendActivity({ a, onDone }: { a: Blend; onDone: (perfect: boolean) => void }) {
+  const [count, setCount] = useState(0)
+  const [joined, setJoined] = useState(false)
+  const [praise, setPraise] = useState<string | null>(null)
+  const timers = useRef<number[]>([])
+
+  useSpeakOnMount(['Toca las sílabas y júntalas.'])
+
+  useEffect(() => {
+    return () => timers.current.forEach((timer) => window.clearTimeout(timer))
+  }, [])
+
+  const tap = (index: number) => {
+    if (joined) return
+    sfx.pop()
+    speak(a.parts[index], 0.72)
+    if (index !== count) return
+    const next = count + 1
+    setCount(next)
+    if (next === a.parts.length) {
+      timers.current.push(
+        window.setTimeout(() => {
+          setJoined(true)
+          sfx.correct()
+          speak(a.word, 0.8)
+        }, 800)
+      )
+      timers.current.push(
+        window.setTimeout(() => {
+          const text = pick(PRAISE)
+          setPraise(text)
+          speak(text)
+        }, 2300)
+      )
+      timers.current.push(window.setTimeout(() => onDone(true), 3600))
+    }
+  }
+
+  return (
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-7">
+      <h2 className="text-center font-display text-2xl">Une las sílabas</h2>
+      <div className="flex h-24 items-center justify-center">
+        {joined && a.emoji ? (
+          <span className="animate-pop text-8xl">{a.emoji}</span>
+        ) : (
+          <span className="text-6xl opacity-30">{a.emoji ? '❓' : '🔤'}</span>
+        )}
+      </div>
+      <motion.div layout className={cn('flex flex-wrap items-center justify-center', joined ? 'gap-0' : 'gap-3')}>
+        {a.parts.map((part, index) => (
+          <motion.button
+            layout
+            key={`${part}-${index}`}
+            type="button"
+            whileTap={{ scale: 0.93 }}
+            onClick={() => tap(index)}
+            className={cn(
+              'flex h-24 items-center justify-center font-display text-6xl transition',
+              SYLLABLE_COLORS[index % 2],
+              joined
+                ? 'px-0'
+                : cn(
+                    'card min-w-24 border-4 border-white px-5',
+                    index < count && 'bg-mint/25 ring-4 ring-mint',
+                    index === count && 'animate-glow'
+                  )
+            )}
+          >
+            {part}
+          </motion.button>
+        ))}
+      </motion.div>
+      <p className="text-center text-sm font-bold text-ink/60">
+        {joined ? '¡Así se lee!' : '👆 Toca cada sílaba, en orden'}
+      </p>
+      <PraiseBubble text={praise} />
+    </div>
+  )
+}
+
+const TRACE_SIZE = 320
+
+/**
+ * Dibujar la letra con el dedo sobre su silueta. No hay errores: se completa cuando
+ * el trazo cubre casi toda la letra (y siempre aparece un botón para seguir).
+ */
+function TraceActivity({ a, onDone }: { a: Trace; onDone: (perfect: boolean) => void }) {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null)
+  const pointsRef = useRef<{ x: number; y: number; hit: boolean }[]>([])
+  const lastRef = useRef<{ x: number; y: number } | null>(null)
+  const doneRef = useRef(false)
+  const timers = useRef<number[]>([])
+  const [coverage, setCoverage] = useState(0)
+  const [praise, setPraise] = useState<string | null>(null)
+  const [canSkip, setCanSkip] = useState(false)
+
+  useSpeakOnMount(['Dibuja la letra con tu dedo.', a.letter])
+
+  const drawGuide = () => {
+    const canvas = canvasRef.current
+    const ctx = canvas?.getContext('2d')
+    if (!canvas || !ctx) return
+    ctx.clearRect(0, 0, TRACE_SIZE, TRACE_SIZE)
+    // Letras con cola (g, j, p, q, y) suben la línea base para que quepan.
+    const tail = /[gjpqy]/.test(a.letter)
+    ctx.font = `600 ${a.letter.length > 1 ? 190 : 290}px Fredoka, Nunito, ui-rounded, system-ui, sans-serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'alphabetic'
+    ctx.fillStyle = 'rgba(45, 49, 66, 0.16)'
+    ctx.fillText(a.letter, TRACE_SIZE / 2, TRACE_SIZE * (tail ? 0.64 : 0.8))
+  }
+
+  useEffect(() => {
+    drawGuide()
+    // Puntos de la letra (cada 6 px) que el trazo tiene que tocar.
+    const ctx = canvasRef.current?.getContext('2d')
+    if (ctx) {
+      const pixels = ctx.getImageData(0, 0, TRACE_SIZE, TRACE_SIZE).data
+      const points: { x: number; y: number; hit: boolean }[] = []
+      for (let y = 3; y < TRACE_SIZE; y += 6) {
+        for (let x = 3; x < TRACE_SIZE; x += 6) {
+          if (pixels[(y * TRACE_SIZE + x) * 4 + 3] > 20) points.push({ x, y, hit: false })
+        }
+      }
+      pointsRef.current = points
+    }
+    timers.current.push(window.setTimeout(() => setCanSkip(true), 9000))
+    const pending = timers.current
+    return () => pending.forEach((timer) => window.clearTimeout(timer))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [a.letter])
+
+  const finish = () => {
+    if (doneRef.current) return
+    doneRef.current = true
+    const text = pick(PRAISE)
+    setPraise(text)
+    sfx.correct()
+    speak(text)
+    timers.current.push(window.setTimeout(() => onDone(true), 1300))
+  }
+
+  const position = (event: React.PointerEvent<HTMLCanvasElement>) => {
+    const rect = event.currentTarget.getBoundingClientRect()
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * TRACE_SIZE,
+      y: ((event.clientY - rect.top) / rect.height) * TRACE_SIZE
+    }
+  }
+
+  const stroke = (from: { x: number; y: number }, to: { x: number; y: number }) => {
+    const ctx = canvasRef.current?.getContext('2d')
+    if (!ctx) return
+    ctx.strokeStyle = '#2563eb'
+    ctx.lineWidth = 22
+    ctx.lineCap = 'round'
+    ctx.lineJoin = 'round'
+    ctx.beginPath()
+    ctx.moveTo(from.x, from.y)
+    ctx.lineTo(to.x, to.y)
+    ctx.stroke()
+    const points = pointsRef.current
+    const steps = Math.max(1, Math.ceil(Math.hypot(to.x - from.x, to.y - from.y) / 6))
+    for (let step = 0; step <= steps; step += 1) {
+      const x = from.x + ((to.x - from.x) * step) / steps
+      const y = from.y + ((to.y - from.y) * step) / steps
+      for (const point of points) {
+        if (!point.hit && (point.x - x) ** 2 + (point.y - y) ** 2 < 18 ** 2) point.hit = true
+      }
+    }
+    const covered = points.length ? points.filter((point) => point.hit).length / points.length : 0
+    setCoverage(covered)
+    if (covered >= 0.85) finish()
+  }
+
+  const clear = () => {
+    if (doneRef.current) return
+    sfx.click()
+    pointsRef.current.forEach((point) => {
+      point.hit = false
+    })
+    setCoverage(0)
+    drawGuide()
+  }
+
+  return (
+    <div className="flex w-full flex-1 flex-col items-center justify-center gap-5">
+      <h2 className="text-center font-display text-2xl">✍️ Dibuja la letra con tu dedo</h2>
+      <canvas
+        ref={canvasRef}
+        width={TRACE_SIZE}
+        height={TRACE_SIZE}
+        className="card w-full max-w-xs touch-none border-4 border-white"
+        style={{ aspectRatio: '1 / 1' }}
+        onPointerDown={(event) => {
+          if (doneRef.current) return
+          event.currentTarget.setPointerCapture(event.pointerId)
+          const point = position(event)
+          lastRef.current = point
+          stroke(point, point)
+        }}
+        onPointerMove={(event) => {
+          if (!lastRef.current || doneRef.current) return
+          const point = position(event)
+          stroke(lastRef.current, point)
+          lastRef.current = point
+        }}
+        onPointerUp={() => {
+          lastRef.current = null
+        }}
+        onPointerCancel={() => {
+          lastRef.current = null
+        }}
+      />
+      <div className="h-3 w-full max-w-xs overflow-hidden rounded-full bg-white/80">
+        <div
+          className="h-full rounded-full bg-mint transition-all"
+          style={{ width: `${Math.min(100, Math.round((coverage / 0.85) * 100))}%` }}
+        />
+      </div>
+      <div className="flex gap-3">
+        <button
+          type="button"
+          onClick={() => {
+            sfx.click()
+            speak(a.letter, 0.75)
+          }}
+          className="btn btn-white h-12 gap-2 px-5 text-sm"
+        >
+          🔊 Escuchar
+        </button>
+        <button type="button" onClick={clear} className="btn btn-white h-12 gap-2 px-5 text-sm">
+          🧽 Borrar
+        </button>
+        {canSkip && (
+          <button type="button" onClick={finish} className="btn btn-primary animate-pop h-12 px-5 text-sm">
+            ¡Listo! ➡️
+          </button>
+        )}
+      </div>
       <PraiseBubble text={praise} />
     </div>
   )
@@ -1044,6 +1508,12 @@ export function ActivityView({
       return <StoryActivity a={activity} onDone={onDone} />
     case 'odd_one_out':
       return <OddOneOutActivity a={activity} onDone={onDone} />
+    case 'learn':
+      return <LearnActivity a={activity} onDone={onDone} />
+    case 'blend':
+      return <BlendActivity a={activity} onDone={onDone} />
+    case 'trace':
+      return <TraceActivity a={activity} onDone={onDone} />
     default:
       return <div className="p-6 text-center">Actividad no disponible</div>
   }

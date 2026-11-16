@@ -1,0 +1,3062 @@
+[
+  {
+    "id": "29e2f8d101fa",
+    "text": "¡Eres increíble!"
+  },
+  {
+    "id": "d6ef009ae174",
+    "text": "¡Excelente!"
+  },
+  {
+    "id": "1fa102a75ee6",
+    "text": "¡Genial!"
+  },
+  {
+    "id": "b86bef0dfbbe",
+    "text": "¡Leíste muy bien!"
+  },
+  {
+    "id": "c3a9e320923f",
+    "text": "¡Lo logra! El dragón vuela."
+  },
+  {
+    "id": "6a803029260c",
+    "text": "¡Lo lograste!"
+  },
+  {
+    "id": "eb172ce2705f",
+    "text": "¡Muy bien!"
+  },
+  {
+    "id": "1b0410583ae6",
+    "text": "¡Qué grande!"
+  },
+  {
+    "id": "7229457eaf7b",
+    "text": "¡Sorpresa! Mamá sonríe."
+  },
+  {
+    "id": "fa8b59f632fe",
+    "text": "¿A dónde me lleva papá?"
+  },
+  {
+    "id": "affa2d7d7372",
+    "text": "¿Con quién corre Chispa?"
+  },
+  {
+    "id": "7eb3524d440c",
+    "text": "¿Cuál empieza con a?"
+  },
+  {
+    "id": "75903df7f29f",
+    "text": "¿Cuál empieza con e?"
+  },
+  {
+    "id": "4d53c8f7a8a0",
+    "text": "¿Cuál empieza con i?"
+  },
+  {
+    "id": "55355bdb3f02",
+    "text": "¿Cuál empieza con o?"
+  },
+  {
+    "id": "3e45c6681ab2",
+    "text": "¿Cuál empieza con u?"
+  },
+  {
+    "id": "f4eb1d5ea7c1",
+    "text": "¿Cuál no es comida?"
+  },
+  {
+    "id": "4b32af85068e",
+    "text": "¿Cuál no es parte del cuerpo?"
+  },
+  {
+    "id": "5255854a8f9a",
+    "text": "¿Cuál no es ropa?"
+  },
+  {
+    "id": "f044fee34880",
+    "text": "¿Cuál no es un animal?"
+  },
+  {
+    "id": "b38e43fb9ddb",
+    "text": "¿Cuál no es una comida?"
+  },
+  {
+    "id": "a81bef4acb9d",
+    "text": "¿De qué color es el carro?"
+  },
+  {
+    "id": "bff3ed5808e7",
+    "text": "¿De qué color es el dragón?"
+  },
+  {
+    "id": "9c726e431d7f",
+    "text": "¿De qué color es la mariposa?"
+  },
+  {
+    "id": "70025fbd151a",
+    "text": "¿De quién es el cumpleaños?"
+  },
+  {
+    "id": "c5d30a7270a2",
+    "text": "¿Dónde nada el pato?"
+  },
+  {
+    "id": "0ac3fb5850c7",
+    "text": "¿Dónde se pone?"
+  },
+  {
+    "id": "d575c39c85a8",
+    "text": "¿Dónde vive la bruja?"
+  },
+  {
+    "id": "fa2797230ca6",
+    "text": "¿Dónde vive la rana?"
+  },
+  {
+    "id": "1707e2c1fb21",
+    "text": "¿En qué toma café mamá?"
+  },
+  {
+    "id": "519079bdac7c",
+    "text": "¿Qué cae en la tierra?"
+  },
+  {
+    "id": "34c645d02eb1",
+    "text": "¿Qué come la nena?"
+  },
+  {
+    "id": "d43e6c8e2777",
+    "text": "¿Qué come la rana?"
+  },
+  {
+    "id": "507cde554c54",
+    "text": "¿Qué es azul?"
+  },
+  {
+    "id": "b2b396968006",
+    "text": "¿Qué es bella?"
+  },
+  {
+    "id": "4c1d77e1eccd",
+    "text": "¿Qué es de mamá?"
+  },
+  {
+    "id": "40d75cdfb912",
+    "text": "¿Qué es de mi papá?"
+  },
+  {
+    "id": "214a778038f3",
+    "text": "¿Qué es de papá?"
+  },
+  {
+    "id": "3cda42009cd9",
+    "text": "¿Qué es grande?"
+  },
+  {
+    "id": "fbfdef9ed11a",
+    "text": "¿Qué hace la bruja?"
+  },
+  {
+    "id": "04fe6d97775b",
+    "text": "¿Qué hace ring ring?"
+  },
+  {
+    "id": "19377cc0b1b5",
+    "text": "¿Qué hacen papá y yo?"
+  },
+  {
+    "id": "bddaddfa1ea4",
+    "text": "¿Qué hay en la caja?"
+  },
+  {
+    "id": "2c20171b8b0e",
+    "text": "¿Qué me da mamá?"
+  },
+  {
+    "id": "6e7a775942ee",
+    "text": "¿Qué me da papá?"
+  },
+  {
+    "id": "949bf029da71",
+    "text": "¿Qué me pasa mamá?"
+  },
+  {
+    "id": "db7ff5f77dfa",
+    "text": "¿Qué mira Chispa?"
+  },
+  {
+    "id": "7d08255364cd",
+    "text": "¿Qué mira la jirafa?"
+  },
+  {
+    "id": "68f1a276eac7",
+    "text": "¿Qué miran el tigre y la cebra?"
+  },
+  {
+    "id": "82d8599629fc",
+    "text": "¿Qué pela mamá?"
+  },
+  {
+    "id": "f96a70d8c3e6",
+    "text": "¿Qué pisa papá?"
+  },
+  {
+    "id": "ad6d807d0d23",
+    "text": "¿Qué quiere hacer el dragón?"
+  },
+  {
+    "id": "9ed46eb6c2b6",
+    "text": "¿Qué rima con bota?"
+  },
+  {
+    "id": "889d396c41fd",
+    "text": "¿Qué rima con cama?"
+  },
+  {
+    "id": "32814d3e6963",
+    "text": "¿Qué rima con lobo?"
+  },
+  {
+    "id": "56cec91c6f19",
+    "text": "¿Qué rima con perro?"
+  },
+  {
+    "id": "ca40305d14dd",
+    "text": "¿Qué rima con queso?"
+  },
+  {
+    "id": "0e432782f3f3",
+    "text": "¿Qué rima con sol?"
+  },
+  {
+    "id": "49968815fe3b",
+    "text": "¿Qué sale de noche?"
+  },
+  {
+    "id": "e28175a05fbc",
+    "text": "¿Qué sale después?"
+  },
+  {
+    "id": "ec431f89a80b",
+    "text": "¿Qué sale en la mañana?"
+  },
+  {
+    "id": "e615d81da1c1",
+    "text": "¿Qué tiene Chispa?"
+  },
+  {
+    "id": "04279422ad08",
+    "text": "¿Qué toma papá?"
+  },
+  {
+    "id": "64799f26d683",
+    "text": "¿Qué usa Chispa?"
+  },
+  {
+    "id": "d59eec27c21c",
+    "text": "¿Qué usa papá?"
+  },
+  {
+    "id": "874366b21892",
+    "text": "¿Qué ve Chispa?"
+  },
+  {
+    "id": "12353a42d781",
+    "text": "¿Qué ve el pato?"
+  },
+  {
+    "id": "0d0ff2c7e8fc",
+    "text": "¿Qué veo yo?"
+  },
+  {
+    "id": "5ffbc3c9f066",
+    "text": "¿Qué vocal falta?"
+  },
+  {
+    "id": "75e6c107c70a",
+    "text": "¿Quién ama a mamá?"
+  },
+  {
+    "id": "5e7a9efcc500",
+    "text": "¿Quién come cereza?"
+  },
+  {
+    "id": "ba34fbdacdea",
+    "text": "¿Quién come coco?"
+  },
+  {
+    "id": "9c0bd202dc9f",
+    "text": "¿Quién come hoja?"
+  },
+  {
+    "id": "5d14635ee45a",
+    "text": "¿Quién come mango?"
+  },
+  {
+    "id": "810aabc9eda4",
+    "text": "¿Quién come piña?"
+  },
+  {
+    "id": "628e69922e8d",
+    "text": "¿Quién come queso?"
+  },
+  {
+    "id": "eb2eea76cb49",
+    "text": "¿Quién come un taco?"
+  },
+  {
+    "id": "5c78d66249e0",
+    "text": "¿Quién come uva?"
+  },
+  {
+    "id": "6e8432ee4f9f",
+    "text": "¿Quién corre?"
+  },
+  {
+    "id": "3d4080f20fbd",
+    "text": "¿Quién dice guau guau?"
+  },
+  {
+    "id": "facdb4bcf8ef",
+    "text": "¿Quién hace muuu?"
+  },
+  {
+    "id": "ea8e76f88293",
+    "text": "¿Quién me ama?"
+  },
+  {
+    "id": "2bb8186d12d5",
+    "text": "¿Quién me da jugo?"
+  },
+  {
+    "id": "9744a86944a1",
+    "text": "¿Quién me da un dado?"
+  },
+  {
+    "id": "ef2fe0bd0faa",
+    "text": "¿Quién mira el girasol?"
+  },
+  {
+    "id": "6ca5388c2ed8",
+    "text": "¿Quién mira la luna?"
+  },
+  {
+    "id": "74fb196beca3",
+    "text": "¿Quién mira la rosa?"
+  },
+  {
+    "id": "a1e43e02a59b",
+    "text": "¿Quién mira la vela?"
+  },
+  {
+    "id": "0d7b58c236f5",
+    "text": "¿Quién pasa la pelota?"
+  },
+  {
+    "id": "cbc92884ebb2",
+    "text": "¿Quién pisa el palo?"
+  },
+  {
+    "id": "2f356a1d37be",
+    "text": "¿Quién sale de la caja?"
+  },
+  {
+    "id": "2911aae0fce2",
+    "text": "¿Quién sale de la casa?"
+  },
+  {
+    "id": "2b0dd7a9ae81",
+    "text": "¿Quién toma jugo?"
+  },
+  {
+    "id": "1cba881e0759",
+    "text": "¿Quién toma leche de noche?"
+  },
+  {
+    "id": "52d50745884a",
+    "text": "¿Quién toma leche?"
+  },
+  {
+    "id": "328f96dbdbc2",
+    "text": "¿Quién toma sopa?"
+  },
+  {
+    "id": "be4f7497283a",
+    "text": "¿Quién usa la guitarra?"
+  },
+  {
+    "id": "7e691a1e45a8",
+    "text": "¿Quién usa la lupa?"
+  },
+  {
+    "id": "5e4dc2f88bd1",
+    "text": "¿Quién usa la moto?"
+  },
+  {
+    "id": "9abd9e9652fe",
+    "text": "¿Quién usa un gorro rojo?"
+  },
+  {
+    "id": "14fc0cd82a2c",
+    "text": "¿Quién usa un yoyo?"
+  },
+  {
+    "id": "0b34086221e5",
+    "text": "¿Quién usa una hoja?"
+  },
+  {
+    "id": "56be290e187a",
+    "text": "¿Quiénes comen moscas?"
+  },
+  {
+    "id": "7b35bef0a8b0",
+    "text": "¿Quiénes comen pescado?"
+  },
+  {
+    "id": "86f7e437faa5",
+    "text": "a"
+  },
+  {
+    "id": "5aa1110542ba",
+    "text": "abeja"
+  },
+  {
+    "id": "5b6bc78dfbd1",
+    "text": "Abeja empieza con a."
+  },
+  {
+    "id": "03d09fa5c55c",
+    "text": "abrigo"
+  },
+  {
+    "id": "4e2ea92439ed",
+    "text": "Ahora el dragón es feliz."
+  },
+  {
+    "id": "94c4ce0f5c7f",
+    "text": "Ahora la rana tiene sueño."
+  },
+  {
+    "id": "30427ee945d0",
+    "text": "Ahora son amigos."
+  },
+  {
+    "id": "d3e78f8d8df2",
+    "text": "Ahora tú."
+  },
+  {
+    "id": "141a92417f71",
+    "text": "ai"
+  },
+  {
+    "id": "437ec6c121ea",
+    "text": "aire"
+  },
+  {
+    "id": "476a60f531ae",
+    "text": "Aire empieza con ai."
+  },
+  {
+    "id": "2f9ee2b33668",
+    "text": "al"
+  },
+  {
+    "id": "c6a378510e0e",
+    "text": "ala"
+  },
+  {
+    "id": "96e8155732e8",
+    "text": "am"
+  },
+  {
+    "id": "01f07beb8567",
+    "text": "amigo"
+  },
+  {
+    "id": "de73eac0c305",
+    "text": "an"
+  },
+  {
+    "id": "89ece4e4a222",
+    "text": "ancla"
+  },
+  {
+    "id": "dee0473f106f",
+    "text": "anillo"
+  },
+  {
+    "id": "23d8e0156062",
+    "text": "ar"
+  },
+  {
+    "id": "026b6a67b902",
+    "text": "araña"
+  },
+  {
+    "id": "07cc4c392eff",
+    "text": "árbol"
+  },
+  {
+    "id": "7e4b9801ff81",
+    "text": "arco"
+  },
+  {
+    "id": "f0b22e96ca7f",
+    "text": "Arco empieza con ar."
+  },
+  {
+    "id": "07c30608ce54",
+    "text": "Arma la palabra."
+  },
+  {
+    "id": "fa9db510a295",
+    "text": "arroz"
+  },
+  {
+    "id": "df211ccdd94a",
+    "text": "as"
+  },
+  {
+    "id": "f095160c09b3",
+    "text": "au"
+  },
+  {
+    "id": "0d612c12d2ac",
+    "text": "auto"
+  },
+  {
+    "id": "5745cb294872",
+    "text": "ave"
+  },
+  {
+    "id": "1901d3a3ed84",
+    "text": "avión"
+  },
+  {
+    "id": "1768d39c5bb4",
+    "text": "azul"
+  },
+  {
+    "id": "e9d71f5ee7c9",
+    "text": "b"
+  },
+  {
+    "id": "6c0596b8ac60",
+    "text": "ba"
+  },
+  {
+    "id": "8339f984a030",
+    "text": "banco"
+  },
+  {
+    "id": "1d7f53dfb132",
+    "text": "baño"
+  },
+  {
+    "id": "5ff84c75c4de",
+    "text": "barco"
+  },
+  {
+    "id": "986b1bc1eb8d",
+    "text": "be"
+  },
+  {
+    "id": "5bb308acf2f8",
+    "text": "bebé"
+  },
+  {
+    "id": "6edd8a12b3ab",
+    "text": "beso"
+  },
+  {
+    "id": "aab9b7bd1700",
+    "text": "bi"
+  },
+  {
+    "id": "ae970b2f45df",
+    "text": "bicicleta"
+  },
+  {
+    "id": "f372a11a1a43",
+    "text": "bloque"
+  },
+  {
+    "id": "53c59901c1af",
+    "text": "blu"
+  },
+  {
+    "id": "17d8f112ce55",
+    "text": "blusa"
+  },
+  {
+    "id": "730f25b6b26a",
+    "text": "Blusa empieza con blu."
+  },
+  {
+    "id": "dc45fe023482",
+    "text": "bo"
+  },
+  {
+    "id": "42a50539b0df",
+    "text": "boca"
+  },
+  {
+    "id": "bcb29f7eb5b9",
+    "text": "bomba"
+  },
+  {
+    "id": "b80a2709da3d",
+    "text": "bota"
+  },
+  {
+    "id": "047ede9f2083",
+    "text": "Bota empieza con bo."
+  },
+  {
+    "id": "c3cf0527598d",
+    "text": "bra"
+  },
+  {
+    "id": "d2f68f12f4b6",
+    "text": "brazo"
+  },
+  {
+    "id": "665aaf5238fc",
+    "text": "bri"
+  },
+  {
+    "id": "6721d9fb11ca",
+    "text": "bu"
+  },
+  {
+    "id": "84a516841ba7",
+    "text": "c"
+  },
+  {
+    "id": "1c42c72cf95a",
+    "text": "ca"
+  },
+  {
+    "id": "62b912d04256",
+    "text": "caballo"
+  },
+  {
+    "id": "e97ba6aed556",
+    "text": "cable"
+  },
+  {
+    "id": "f5b8ead848bc",
+    "text": "Cae la lluvia."
+  },
+  {
+    "id": "f424452a9673",
+    "text": "café"
+  },
+  {
+    "id": "862448c9b226",
+    "text": "caja"
+  },
+  {
+    "id": "1bef95abfc0f",
+    "text": "cama"
+  },
+  {
+    "id": "90db2a49ff93",
+    "text": "camisa"
+  },
+  {
+    "id": "669b6726d89b",
+    "text": "campana"
+  },
+  {
+    "id": "95c087574ace",
+    "text": "cara"
+  },
+  {
+    "id": "db4bcb59d5a6",
+    "text": "caracol"
+  },
+  {
+    "id": "3959fc6166e0",
+    "text": "carro"
+  },
+  {
+    "id": "4de8e6ba47c8",
+    "text": "Carro tiene rro."
+  },
+  {
+    "id": "81bce1f3bf34",
+    "text": "casa"
+  },
+  {
+    "id": "d30512d836f1",
+    "text": "Casa empieza con ca."
+  },
+  {
+    "id": "15b13515a04c",
+    "text": "Casi casi. ¡Otra vez!"
+  },
+  {
+    "id": "03677197af2b",
+    "text": "Casi. ¡Intenta otra vez!"
+  },
+  {
+    "id": "b452d6b23b3c",
+    "text": "ce"
+  },
+  {
+    "id": "a5af05e62fec",
+    "text": "cebra"
+  },
+  {
+    "id": "e4c06a356652",
+    "text": "cer"
+  },
+  {
+    "id": "c522d41a12d7",
+    "text": "cerdo"
+  },
+  {
+    "id": "ff180518bb92",
+    "text": "cereza"
+  },
+  {
+    "id": "74cbf12e072b",
+    "text": "cero"
+  },
+  {
+    "id": "0609e292df9a",
+    "text": "cerro"
+  },
+  {
+    "id": "482bd64c6c9f",
+    "text": "ch"
+  },
+  {
+    "id": "55c681171c32",
+    "text": "cha"
+  },
+  {
+    "id": "69f14405f3a9",
+    "text": "che"
+  },
+  {
+    "id": "bc32c6fe0275",
+    "text": "chi"
+  },
+  {
+    "id": "ae34a7cc973e",
+    "text": "chile"
+  },
+  {
+    "id": "9278f4e63ea6",
+    "text": "Chile empieza con chi."
+  },
+  {
+    "id": "d2ab3fd9840e",
+    "text": "chispa"
+  },
+  {
+    "id": "0777ad3242e3",
+    "text": "Chispa abre la caja."
+  },
+  {
+    "id": "4d9a706b09a1",
+    "text": "Chispa abre la puerta."
+  },
+  {
+    "id": "c8787a148ff3",
+    "text": "Chispa corre con el perro."
+  },
+  {
+    "id": "3717fe92768c",
+    "text": "Chispa es muy feliz."
+  },
+  {
+    "id": "5a31f67ef261",
+    "text": "Chispa frena el carro."
+  },
+  {
+    "id": "f11d76cc5d8a",
+    "text": "Chispa llega a la casa."
+  },
+  {
+    "id": "20e132c91ed1",
+    "text": "Chispa mira el carro rojo."
+  },
+  {
+    "id": "8db559ef11c9",
+    "text": "Chispa quiere verla."
+  },
+  {
+    "id": "494a15a31c58",
+    "text": "Chispa rodea la piedra y sigue."
+  },
+  {
+    "id": "376aaa5431a1",
+    "text": "Chispa sonríe y la mira volar."
+  },
+  {
+    "id": "7748794b2da3",
+    "text": "Chispa tiene un carro rojo."
+  },
+  {
+    "id": "1f8ed99858e9",
+    "text": "Chispa tiene un mapa."
+  },
+  {
+    "id": "3c548b1e5822",
+    "text": "Chispa usa una moto roja."
+  },
+  {
+    "id": "200c91814fa8",
+    "text": "Chispa va a la casa."
+  },
+  {
+    "id": "6254401870a7",
+    "text": "Chispa va muy despacio."
+  },
+  {
+    "id": "70556237e281",
+    "text": "Chispa ve una piedra."
+  },
+  {
+    "id": "d2f07d750025",
+    "text": "chivo"
+  },
+  {
+    "id": "5a6e35513b29",
+    "text": "cho"
+  },
+  {
+    "id": "2d34aebd561e",
+    "text": "chu"
+  },
+  {
+    "id": "5a4fe08359c7",
+    "text": "ci"
+  },
+  {
+    "id": "2ffb113581e4",
+    "text": "cine"
+  },
+  {
+    "id": "0c85cbac9726",
+    "text": "Cine empieza con ci."
+  },
+  {
+    "id": "f3a839464298",
+    "text": "cla"
+  },
+  {
+    "id": "87dda2041664",
+    "text": "co"
+  },
+  {
+    "id": "09f836894fc1",
+    "text": "coco"
+  },
+  {
+    "id": "9ec6c0462986",
+    "text": "cohete"
+  },
+  {
+    "id": "5fb14f826fec",
+    "text": "comer"
+  },
+  {
+    "id": "b1f6e510eb0f",
+    "text": "con"
+  },
+  {
+    "id": "3debf0145be9",
+    "text": "Con e y con i, la ce suena suave: ce, ci."
+  },
+  {
+    "id": "51390396e3fe",
+    "text": "conejo"
+  },
+  {
+    "id": "a0819d56d106",
+    "text": "corona"
+  },
+  {
+    "id": "43e97870fe6f",
+    "text": "correr"
+  },
+  {
+    "id": "93c30b1a3b78",
+    "text": "cu"
+  },
+  {
+    "id": "a37e3bea6f0b",
+    "text": "cuatro"
+  },
+  {
+    "id": "e5d411becf01",
+    "text": "cuna"
+  },
+  {
+    "id": "3c363836cf4e",
+    "text": "d"
+  },
+  {
+    "id": "cdd4f8740950",
+    "text": "da"
+  },
+  {
+    "id": "9faf291e06c9",
+    "text": "dado"
+  },
+  {
+    "id": "783717e19dbd",
+    "text": "Dado empieza con da."
+  },
+  {
+    "id": "600ccd1b7156",
+    "text": "de"
+  },
+  {
+    "id": "238a07addaf7",
+    "text": "de mamá"
+  },
+  {
+    "id": "6acb51f824b3",
+    "text": "de papá"
+  },
+  {
+    "id": "8b9b43e964ef",
+    "text": "dedo"
+  },
+  {
+    "id": "e08062933a6c",
+    "text": "del gato"
+  },
+  {
+    "id": "8cd8c1089ab8",
+    "text": "Dentro hay una caja roja."
+  },
+  {
+    "id": "17f753d5d2dc",
+    "text": "Después sale el sol."
+  },
+  {
+    "id": "f502e82c25bb",
+    "text": "di"
+  },
+  {
+    "id": "b797c87a2369",
+    "text": "Dibuja la letra con tu dedo."
+  },
+  {
+    "id": "eadcd9bd2a09",
+    "text": "do"
+  },
+  {
+    "id": "f4145289c9a5",
+    "text": "dona"
+  },
+  {
+    "id": "6bb2883998f8",
+    "text": "Dos letras juntas, un solo sonido."
+  },
+  {
+    "id": "cc3518eef5ba",
+    "text": "dra"
+  },
+  {
+    "id": "13d63d3907e0",
+    "text": "dragón"
+  },
+  {
+    "id": "5ae1b5fb5568",
+    "text": "dre"
+  },
+  {
+    "id": "fa114377ef35",
+    "text": "du"
+  },
+  {
+    "id": "58e6b3a414a1",
+    "text": "e"
+  },
+  {
+    "id": "4f1ea4f09db2",
+    "text": "el"
+  },
+  {
+    "id": "c77e765ca8f5",
+    "text": "El águila mira el girasol."
+  },
+  {
+    "id": "d6f5bba182f3",
+    "text": "El auto es de mi papá."
+  },
+  {
+    "id": "82216d347174",
+    "text": "El bebé toma café en la taza."
+  },
+  {
+    "id": "a6e029c5eb44",
+    "text": "El bebé toma sopa."
+  },
+  {
+    "id": "0254b2f84e28",
+    "text": "El carro corre y corre."
+  },
+  {
+    "id": "193113fcfad8",
+    "text": "El carro es de papá."
+  },
+  {
+    "id": "b4cffa335945",
+    "text": "El carro rojo corre."
+  },
+  {
+    "id": "65928309fff7",
+    "text": "El cerdo mira el mar."
+  },
+  {
+    "id": "b67209d539fc",
+    "text": "el cielo"
+  },
+  {
+    "id": "0514c6034d12",
+    "text": "El cielo se pone gris."
+  },
+  {
+    "id": "eb7739827034",
+    "text": "El cocodrilo come pescado."
+  },
+  {
+    "id": "4f6132fd6d81",
+    "text": "El dado es de la nena."
+  },
+  {
+    "id": "38269736855f",
+    "text": "El dragón mira a las aves."
+  },
+  {
+    "id": "c2291198ccd4",
+    "text": "El dragón toma la sopa y sonríe."
+  },
+  {
+    "id": "b5de134bcd20",
+    "text": "El elefante es grande."
+  },
+  {
+    "id": "c6ee2427c68c",
+    "text": "El gato mira la luna."
+  },
+  {
+    "id": "96496e335fb3",
+    "text": "El genio usa la guitarra."
+  },
+  {
+    "id": "d7ee56f1ffba",
+    "text": "El gorro es de papá."
+  },
+  {
+    "id": "cc557708f4dc",
+    "text": "El hada usa una hoja."
+  },
+  {
+    "id": "c08ac633627a",
+    "text": "El mago me da un dado."
+  },
+  {
+    "id": "4a799e74b9f5",
+    "text": "El mapa dice: busca en el garaje."
+  },
+  {
+    "id": "e3deb5b54b6f",
+    "text": "El mono come coco."
+  },
+  {
+    "id": "ff48968faac1",
+    "text": "El mono mira la moto."
+  },
+  {
+    "id": "c0951d43a00e",
+    "text": "El mundo es bello."
+  },
+  {
+    "id": "52c524729ea4",
+    "text": "El nene mira la luna de la casa."
+  },
+  {
+    "id": "3f7284a39d33",
+    "text": "El nene mira la vela."
+  },
+  {
+    "id": "5f0b53256a6e",
+    "text": "El nene pasa la pelota."
+  },
+  {
+    "id": "d6e1b4f8154c",
+    "text": "El niño come gelatina."
+  },
+  {
+    "id": "17e7bb4e8933",
+    "text": "El niño come piña y la nena toma jugo."
+  },
+  {
+    "id": "253cf60cd178",
+    "text": "El niño come piña."
+  },
+  {
+    "id": "0a180db91d38",
+    "text": "El niño toma soda."
+  },
+  {
+    "id": "3cbc48a24c36",
+    "text": "El niño usa la silla."
+  },
+  {
+    "id": "9f33ed407ec6",
+    "text": "El niño ve la jirafa y el payaso ve el yoyo."
+  },
+  {
+    "id": "da35486e1ac3",
+    "text": "El oso usa la lupa."
+  },
+  {
+    "id": "f85e1e6f05af",
+    "text": "El pato mira la luna y se va a dormir."
+  },
+  {
+    "id": "0fc1c956e6a9",
+    "text": "El pato nada en el lago."
+  },
+  {
+    "id": "acac83db01e1",
+    "text": "El pato se ríe."
+  },
+  {
+    "id": "1b51240308b7",
+    "text": "El pato toma sopa."
+  },
+  {
+    "id": "e870451a0784",
+    "text": "El payaso usa un gorro rojo."
+  },
+  {
+    "id": "056225a52990",
+    "text": "El payaso usa un yoyo."
+  },
+  {
+    "id": "17ddf856b5be",
+    "text": "El perro come queso en la casa."
+  },
+  {
+    "id": "d9931cd8e8d8",
+    "text": "El perro corre."
+  },
+  {
+    "id": "c862e8ca8442",
+    "text": "El pez es azul."
+  },
+  {
+    "id": "4df4d7bf3961",
+    "text": "El pollo come uva."
+  },
+  {
+    "id": "93fcf03178fa",
+    "text": "Él quiere volar como ellas."
+  },
+  {
+    "id": "9cba80524691",
+    "text": "El sapo mira la luna."
+  },
+  {
+    "id": "788927b42f5c",
+    "text": "El sapo pisa el palo."
+  },
+  {
+    "id": "e29dfc0017a7",
+    "text": "El sapo sale."
+  },
+  {
+    "id": "6a57656cc61f",
+    "text": "el sol"
+  },
+  {
+    "id": "be6aca2216d3",
+    "text": "El sol sale en la mañana."
+  },
+  {
+    "id": "afd0a8cfeaa1",
+    "text": "El tigre y la cebra miran el tren."
+  },
+  {
+    "id": "9c2f60e6d584",
+    "text": "El toro mira la rosa."
+  },
+  {
+    "id": "0e2df952725e",
+    "text": "El zapato es de la nena."
+  },
+  {
+    "id": "08eb74f771f1",
+    "text": "El zorro come queso."
+  },
+  {
+    "id": "5480e9c0dfd3",
+    "text": "elefante"
+  },
+  {
+    "id": "2730b7b4d9d4",
+    "text": "Elefante empieza con e."
+  },
+  {
+    "id": "094b0fe0e302",
+    "text": "en"
+  },
+  {
+    "id": "1b62cc4a66c0",
+    "text": "En que y qui, la u no suena."
+  },
+  {
+    "id": "aa7a7f614055",
+    "text": "en un bosque"
+  },
+  {
+    "id": "2829ab9955fb",
+    "text": "en un carro"
+  },
+  {
+    "id": "34362e983d84",
+    "text": "en un lago"
+  },
+  {
+    "id": "fe37b248002b",
+    "text": "en una casa"
+  },
+  {
+    "id": "63f1e64a2f38",
+    "text": "en una flor"
+  },
+  {
+    "id": "f648ee60a4e2",
+    "text": "en una moto"
+  },
+  {
+    "id": "972064c2f5bd",
+    "text": "Encuentra las parejas iguales"
+  },
+  {
+    "id": "602c57ffb51a",
+    "text": "er"
+  },
+  {
+    "id": "09cd68a2a77b",
+    "text": "es"
+  },
+  {
+    "id": "db4a11603bab",
+    "text": "Es mi mapa."
+  },
+  {
+    "id": "7a1a95fc2003",
+    "text": "Es mi oso."
+  },
+  {
+    "id": "581827bdea58",
+    "text": "escoba"
+  },
+  {
+    "id": "e0cab4078367",
+    "text": "estrella"
+  },
+  {
+    "id": "4a0a19218e08",
+    "text": "f"
+  },
+  {
+    "id": "215a956168f7",
+    "text": "fa"
+  },
+  {
+    "id": "8ed985515c5f",
+    "text": "farol"
+  },
+  {
+    "id": "ee3e4af9c48a",
+    "text": "fe"
+  },
+  {
+    "id": "4ce73a15a7ee",
+    "text": "fé"
+  },
+  {
+    "id": "6b163fa3bad4",
+    "text": "fi"
+  },
+  {
+    "id": "a2f17ed1c6a8",
+    "text": "fla"
+  },
+  {
+    "id": "4951dbef1159",
+    "text": "fli"
+  },
+  {
+    "id": "19082866d46a",
+    "text": "fo"
+  },
+  {
+    "id": "76667d45f8a2",
+    "text": "foca"
+  },
+  {
+    "id": "8c51630ff5f9",
+    "text": "Foca empieza con fo."
+  },
+  {
+    "id": "f5b12374a0a2",
+    "text": "foco"
+  },
+  {
+    "id": "5178e2e17670",
+    "text": "fre"
+  },
+  {
+    "id": "5a610651f69d",
+    "text": "fresa"
+  },
+  {
+    "id": "f82fe565a0b9",
+    "text": "Fresa empieza con fre."
+  },
+  {
+    "id": "ddbc4e272b36",
+    "text": "fu"
+  },
+  {
+    "id": "54fd1711209f",
+    "text": "g"
+  },
+  {
+    "id": "72b6ef474440",
+    "text": "ga"
+  },
+  {
+    "id": "986d4b527605",
+    "text": "gallo"
+  },
+  {
+    "id": "8f39c63d5047",
+    "text": "gato"
+  },
+  {
+    "id": "a2d1e89d80bc",
+    "text": "Gato empieza con ga."
+  },
+  {
+    "id": "a9060bd55257",
+    "text": "ge"
+  },
+  {
+    "id": "d55ab886869c",
+    "text": "Ge y gi suenan como je y ji. En gue y gui, la u no suena."
+  },
+  {
+    "id": "68163581bf2f",
+    "text": "genio"
+  },
+  {
+    "id": "fc7794c8c4e6",
+    "text": "gi"
+  },
+  {
+    "id": "106cb00736b6",
+    "text": "girasol"
+  },
+  {
+    "id": "fe14665f996b",
+    "text": "Girasol empieza con gi."
+  },
+  {
+    "id": "f369ed7d0ec0",
+    "text": "gla"
+  },
+  {
+    "id": "16883e9451da",
+    "text": "glo"
+  },
+  {
+    "id": "31039edaddb3",
+    "text": "globo"
+  },
+  {
+    "id": "1ec558a60b5d",
+    "text": "go"
+  },
+  {
+    "id": "dda0aa486023",
+    "text": "gorro"
+  },
+  {
+    "id": "244eebcd964a",
+    "text": "gota"
+  },
+  {
+    "id": "4da764e33fe7",
+    "text": "gra"
+  },
+  {
+    "id": "81dbcb9162b4",
+    "text": "gu"
+  },
+  {
+    "id": "25e90b9eb53a",
+    "text": "gue"
+  },
+  {
+    "id": "d6a7af134530",
+    "text": "gui"
+  },
+  {
+    "id": "4436a76d1c8a",
+    "text": "guitarra"
+  },
+  {
+    "id": "e1c4f90e9645",
+    "text": "gusano"
+  },
+  {
+    "id": "27d5482eebd0",
+    "text": "h"
+  },
+  {
+    "id": "f9fc27b9374a",
+    "text": "ha"
+  },
+  {
+    "id": "0263f893b84f",
+    "text": "hada"
+  },
+  {
+    "id": "329b8a9e8045",
+    "text": "Hada empieza con ha."
+  },
+  {
+    "id": "ebddd6b268d9",
+    "text": "hay"
+  },
+  {
+    "id": "01da0ab1ba1c",
+    "text": "Hay una moneda de oro."
+  },
+  {
+    "id": "30f088ea6673",
+    "text": "he"
+  },
+  {
+    "id": "d35dbc106281",
+    "text": "helado"
+  },
+  {
+    "id": "c22b5f917834",
+    "text": "hi"
+  },
+  {
+    "id": "bc79a481fabb",
+    "text": "hilo"
+  },
+  {
+    "id": "b26bf4432d8e",
+    "text": "hipopótamo"
+  },
+  {
+    "id": "9a76a857ad39",
+    "text": "ho"
+  },
+  {
+    "id": "d4235bc03bba",
+    "text": "hoja"
+  },
+  {
+    "id": "99800b85d338",
+    "text": "hola"
+  },
+  {
+    "id": "5cfb50a009e6",
+    "text": "Hola, mamá."
+  },
+  {
+    "id": "ecd92517fe58",
+    "text": "Hoy es el cumpleaños de mamá."
+  },
+  {
+    "id": "06b08b325631",
+    "text": "hu"
+  },
+  {
+    "id": "ae330fb416dc",
+    "text": "hue"
+  },
+  {
+    "id": "e7d715d84503",
+    "text": "hueso"
+  },
+  {
+    "id": "12c2d512a3ad",
+    "text": "huevo"
+  },
+  {
+    "id": "042dc4512fa3",
+    "text": "i"
+  },
+  {
+    "id": "f30accb48e68",
+    "text": "ia"
+  },
+  {
+    "id": "46680a665d08",
+    "text": "ie"
+  },
+  {
+    "id": "f163153f77e4",
+    "text": "iglesia"
+  },
+  {
+    "id": "53c1d6afa31a",
+    "text": "il"
+  },
+  {
+    "id": "42a0d3068dfe",
+    "text": "im"
+  },
+  {
+    "id": "af10ef20dd90",
+    "text": "in"
+  },
+  {
+    "id": "5a258230180d",
+    "text": "io"
+  },
+  {
+    "id": "aa1553beed5d",
+    "text": "ir"
+  },
+  {
+    "id": "b47f363e2b43",
+    "text": "is"
+  },
+  {
+    "id": "ef64ecf77953",
+    "text": "isla"
+  },
+  {
+    "id": "cfeac248b888",
+    "text": "Isla empieza con i."
+  },
+  {
+    "id": "5a76d2ef8b8b",
+    "text": "Isla empieza con is."
+  },
+  {
+    "id": "5c2dd944dde9",
+    "text": "j"
+  },
+  {
+    "id": "84572ef2253e",
+    "text": "ja"
+  },
+  {
+    "id": "68d2ad23b5e1",
+    "text": "je"
+  },
+  {
+    "id": "5bc56a2873ad",
+    "text": "ji"
+  },
+  {
+    "id": "4b1570781170",
+    "text": "jirafa"
+  },
+  {
+    "id": "76bc02b16706",
+    "text": "Jirafa empieza con ji."
+  },
+  {
+    "id": "bd73d35759d7",
+    "text": "jo"
+  },
+  {
+    "id": "a7ae639ea556",
+    "text": "ju"
+  },
+  {
+    "id": "68551b8a629b",
+    "text": "Junta la mayúscula con su minúscula."
+  },
+  {
+    "id": "07c342be6e56",
+    "text": "l"
+  },
+  {
+    "id": "3efd4c0fe185",
+    "text": "la"
+  },
+  {
+    "id": "b250077bc111",
+    "text": "La araña sale de la caja."
+  },
+  {
+    "id": "1684ddf7f861",
+    "text": "La blusa es azul."
+  },
+  {
+    "id": "695d3aa2dce8",
+    "text": "La bota es de papá."
+  },
+  {
+    "id": "5e319ca7ffd3",
+    "text": "La bruja hace una sopa roja."
+  },
+  {
+    "id": "5a4a6dd2a701",
+    "text": "La bruja vive en un bosque."
+  },
+  {
+    "id": "ec2b66cdca1f",
+    "text": "La casa es de mamá."
+  },
+  {
+    "id": "eff31b7d2944",
+    "text": "La doble erre suena fuerte."
+  },
+  {
+    "id": "d7d319448feb",
+    "text": "La dona es de mamá."
+  },
+  {
+    "id": "77717a7f20eb",
+    "text": "La foca come un taco."
+  },
+  {
+    "id": "3cf2a0fda81b",
+    "text": "La hache no suena."
+  },
+  {
+    "id": "c7c002fe1c26",
+    "text": "La jirafa come hoja."
+  },
+  {
+    "id": "6f61f7664f45",
+    "text": "La jirafa corre a su casa."
+  },
+  {
+    "id": "17ca8cfb9e00",
+    "text": "La jirafa mira el cielo."
+  },
+  {
+    "id": "322ca8798c53",
+    "text": "La jirafa mira la luna."
+  },
+  {
+    "id": "7e37f3ddf7f5",
+    "text": "La jirafa toma jugo."
+  },
+  {
+    "id": "952e62a21364",
+    "text": "La jirafa toma leche con pan."
+  },
+  {
+    "id": "545de87c7e96",
+    "text": "La llave es de papá."
+  },
+  {
+    "id": "7a25190ff4a7",
+    "text": "La lluvia cae en la tierra."
+  },
+  {
+    "id": "28e277b49cce",
+    "text": "la luna"
+  },
+  {
+    "id": "26e03ab65b7f",
+    "text": "La luna sale de noche."
+  },
+  {
+    "id": "a76bfb814254",
+    "text": "La luna sale y el pato la mira."
+  },
+  {
+    "id": "fcaf687b8a70",
+    "text": "La luna sale."
+  },
+  {
+    "id": "a9f5ba21e0b7",
+    "text": "La luna tiembla."
+  },
+  {
+    "id": "9ccf07967ccc",
+    "text": "La maceta es de mamá."
+  },
+  {
+    "id": "2c9bdbbe8775",
+    "text": "La mariposa es bella."
+  },
+  {
+    "id": "158d765504bb",
+    "text": "La mariposa no se asusta."
+  },
+  {
+    "id": "da72611bd1cf",
+    "text": "La mariposa se pone en una flor."
+  },
+  {
+    "id": "6cb06fc0f39a",
+    "text": "La mochila es de la nena."
+  },
+  {
+    "id": "673ac7fb7e29",
+    "text": "La nena come cereza."
+  },
+  {
+    "id": "ad49e398b423",
+    "text": "La nena come un taco."
+  },
+  {
+    "id": "947aea976c32",
+    "text": "La nena come una fresa."
+  },
+  {
+    "id": "8514af16a467",
+    "text": "La nena toma leche de noche."
+  },
+  {
+    "id": "f91b9cb1d920",
+    "text": "La nena toma leche."
+  },
+  {
+    "id": "79a0c4236e8a",
+    "text": "La nena toma sopa en el plato."
+  },
+  {
+    "id": "c8b37e0d147c",
+    "text": "La nena toma sopa."
+  },
+  {
+    "id": "e0459c9cdd94",
+    "text": "La noche es bella."
+  },
+  {
+    "id": "08b599becd2d",
+    "text": "La piedra no se mueve."
+  },
+  {
+    "id": "27958b78eb0b",
+    "text": "La rana sale de la casa."
+  },
+  {
+    "id": "91bb51b48f17",
+    "text": "La rana salta y la come."
+  },
+  {
+    "id": "2a289477ade7",
+    "text": "La rana se duerme en una hoja."
+  },
+  {
+    "id": "305afe280823",
+    "text": "La rana vive en un lago."
+  },
+  {
+    "id": "b5623beafddf",
+    "text": "La rata come queso y el gato la mira."
+  },
+  {
+    "id": "3c4cc160c6ff",
+    "text": "La torta es de mamá."
+  },
+  {
+    "id": "a3530c895343",
+    "text": "La torta tiene fresas y crema."
+  },
+  {
+    "id": "a300dee8bd8b",
+    "text": "La vaca come uva."
+  },
+  {
+    "id": "4e68e95b58a8",
+    "text": "lago"
+  },
+  {
+    "id": "cbf61ffd8cce",
+    "text": "lana"
+  },
+  {
+    "id": "fd70982deca6",
+    "text": "Las ranas comen moscas."
+  },
+  {
+    "id": "00366908b7d7",
+    "text": "lata"
+  },
+  {
+    "id": "593b743b207e",
+    "text": "le"
+  },
+  {
+    "id": "3c60405a251f",
+    "text": "leche"
+  },
+  {
+    "id": "eaf7da85f6a1",
+    "text": "Lee la frase en voz alta."
+  },
+  {
+    "id": "50aa55e4fd35",
+    "text": "Lee la frase y toca el dibujo."
+  },
+  {
+    "id": "365938be4fe6",
+    "text": "Lee la frase."
+  },
+  {
+    "id": "f2dbc75384f4",
+    "text": "Lee la palabra y toca su dibujo."
+  },
+  {
+    "id": "41db30f80221",
+    "text": "li"
+  },
+  {
+    "id": "9fc74bdff2bd",
+    "text": "limón"
+  },
+  {
+    "id": "110c8a30c160",
+    "text": "ll"
+  },
+  {
+    "id": "0d7b6c843275",
+    "text": "lla"
+  },
+  {
+    "id": "b48663d247ed",
+    "text": "llave"
+  },
+  {
+    "id": "c530d69a10af",
+    "text": "Llave empieza con lla."
+  },
+  {
+    "id": "9b23c45cf0fb",
+    "text": "lle"
+  },
+  {
+    "id": "2b2fcc58b559",
+    "text": "lli"
+  },
+  {
+    "id": "15eb5215aad6",
+    "text": "llo"
+  },
+  {
+    "id": "1b870033c878",
+    "text": "llu"
+  },
+  {
+    "id": "b16f5946e46d",
+    "text": "lluvia"
+  },
+  {
+    "id": "638e8f017157",
+    "text": "lo"
+  },
+  {
+    "id": "f08a644d5a1c",
+    "text": "lona"
+  },
+  {
+    "id": "af715f9b7e18",
+    "text": "loro"
+  },
+  {
+    "id": "71c61afd3e6c",
+    "text": "los"
+  },
+  {
+    "id": "76a7a4a78ced",
+    "text": "Los dos van al lago."
+  },
+  {
+    "id": "079136e1ba11",
+    "text": "Los gatos comen pescado."
+  },
+  {
+    "id": "8f2a90278f4f",
+    "text": "Los perros corren en el bosque."
+  },
+  {
+    "id": "3f76228c99e5",
+    "text": "lu"
+  },
+  {
+    "id": "4b7fad4f3f94",
+    "text": "luna"
+  },
+  {
+    "id": "900bac9f13ce",
+    "text": "lupa"
+  },
+  {
+    "id": "3fb4ac52b7c3",
+    "text": "Lupa empieza con lu."
+  },
+  {
+    "id": "6b0d31c0d563",
+    "text": "m"
+  },
+  {
+    "id": "1382244e1784",
+    "text": "ma"
+  },
+  {
+    "id": "143cd9524a4d",
+    "text": "má"
+  },
+  {
+    "id": "d89b5eab0698",
+    "text": "maceta"
+  },
+  {
+    "id": "fd154138b2ed",
+    "text": "mago"
+  },
+  {
+    "id": "afa2148c2a89",
+    "text": "maleta"
+  },
+  {
+    "id": "db9aaa954ba6",
+    "text": "mamá"
+  },
+  {
+    "id": "347199e2d2ce",
+    "text": "Mamá abre la puerta."
+  },
+  {
+    "id": "5d054a322bac",
+    "text": "Mamá empieza con ma."
+  },
+  {
+    "id": "588f9c36aef6",
+    "text": "Mamá me da la cena y un beso."
+  },
+  {
+    "id": "b700bcc1e0a3",
+    "text": "Mamá me da la cena."
+  },
+  {
+    "id": "f7b325159f11",
+    "text": "Mamá me da pan."
+  },
+  {
+    "id": "7fbf3867a615",
+    "text": "Mamá me da queso."
+  },
+  {
+    "id": "61d1153c1a69",
+    "text": "Mamá me da un beso."
+  },
+  {
+    "id": "6b023787bd10",
+    "text": "Mamá me da una caja."
+  },
+  {
+    "id": "94be61703a09",
+    "text": "Mamá me da una uva."
+  },
+  {
+    "id": "18474edd8ab5",
+    "text": "Mamá me mima."
+  },
+  {
+    "id": "126f9100e0a3",
+    "text": "Mamá me pasa la sopa."
+  },
+  {
+    "id": "deef6d32b677",
+    "text": "Mamá me pasa sopa."
+  },
+  {
+    "id": "ea99f7032e63",
+    "text": "Mamá pela la pera."
+  },
+  {
+    "id": "034775e843c0",
+    "text": "Mamá toma agua."
+  },
+  {
+    "id": "68618dca3720",
+    "text": "Mamá toma café en la taza."
+  },
+  {
+    "id": "abf1aa4a5e1a",
+    "text": "mano"
+  },
+  {
+    "id": "4a472d01a3c9",
+    "text": "mapa"
+  },
+  {
+    "id": "476999d007d8",
+    "text": "mariposa"
+  },
+  {
+    "id": "b1c1d8736f20",
+    "text": "me"
+  },
+  {
+    "id": "08627a3864d8",
+    "text": "melón"
+  },
+  {
+    "id": "f04cc316d72b",
+    "text": "mesa"
+  },
+  {
+    "id": "9c51ad8660ea",
+    "text": "mi"
+  },
+  {
+    "id": "119743a9d46a",
+    "text": "mí"
+  },
+  {
+    "id": "9543bf02f239",
+    "text": "Mi amigo come coco."
+  },
+  {
+    "id": "959b8c4e8dc7",
+    "text": "Mi mamá me ama."
+  },
+  {
+    "id": "7d842681bf80",
+    "text": "Mi mamá me da jugo."
+  },
+  {
+    "id": "a07eaae3d7b1",
+    "text": "Mi mamá me da una rosa."
+  },
+  {
+    "id": "181e3d113a47",
+    "text": "Mi mamá me mima."
+  },
+  {
+    "id": "024bebab95c0",
+    "text": "Mi mamá sala la sopa."
+  },
+  {
+    "id": "942faa29e8ff",
+    "text": "Mi papá ama a mamá."
+  },
+  {
+    "id": "31082b887ad2",
+    "text": "Mi papá usa la moto."
+  },
+  {
+    "id": "dc6f2db4be95",
+    "text": "mico"
+  },
+  {
+    "id": "8b1d2cb8a5c1",
+    "text": "mima"
+  },
+  {
+    "id": "d2194115bad0",
+    "text": "mío"
+  },
+  {
+    "id": "94addf283fdd",
+    "text": "Mira y escucha la secuencia. Después repítela."
+  },
+  {
+    "id": "6adbae8c894e",
+    "text": "mo"
+  },
+  {
+    "id": "a02f4c78a6c4",
+    "text": "mochila"
+  },
+  {
+    "id": "9900d8257ed2",
+    "text": "món"
+  },
+  {
+    "id": "f1f1147fca45",
+    "text": "moneda"
+  },
+  {
+    "id": "68caafb2fa51",
+    "text": "mono"
+  },
+  {
+    "id": "58cb79436bc6",
+    "text": "moño"
+  },
+  {
+    "id": "381ba5cd31fd",
+    "text": "mopa"
+  },
+  {
+    "id": "4ae4981c4643",
+    "text": "mosca"
+  },
+  {
+    "id": "1f7f1c7a647c",
+    "text": "moto"
+  },
+  {
+    "id": "1247e024fd6d",
+    "text": "mu"
+  },
+  {
+    "id": "141a748f5c07",
+    "text": "mula"
+  },
+  {
+    "id": "5956a2b28d94",
+    "text": "mundo"
+  },
+  {
+    "id": "d1854cae891e",
+    "text": "n"
+  },
+  {
+    "id": "5efb4ac2212f",
+    "text": "na"
+  },
+  {
+    "id": "f60d2a2f7993",
+    "text": "ne"
+  },
+  {
+    "id": "1a52a5d1e9b1",
+    "text": "nena"
+  },
+  {
+    "id": "0702b7e4a059",
+    "text": "Nena empieza con ne."
+  },
+  {
+    "id": "a7bfb90ac3a0",
+    "text": "nene"
+  },
+  {
+    "id": "c5f2aaa81dbf",
+    "text": "ni"
+  },
+  {
+    "id": "670c2b4e9145",
+    "text": "nido"
+  },
+  {
+    "id": "c8cc05a1e657",
+    "text": "nieve"
+  },
+  {
+    "id": "36a2baf40df6",
+    "text": "niño"
+  },
+  {
+    "id": "80fa420d4ff1",
+    "text": "Niño tiene ño."
+  },
+  {
+    "id": "98a5c9e92189",
+    "text": "nio"
+  },
+  {
+    "id": "fd1286353570",
+    "text": "no"
+  },
+  {
+    "id": "fdadc53ed478",
+    "text": "noche"
+  },
+  {
+    "id": "a923f42fb3fa",
+    "text": "nota"
+  },
+  {
+    "id": "539e0278337f",
+    "text": "nu"
+  },
+  {
+    "id": "fcf84a84d037",
+    "text": "nube"
+  },
+  {
+    "id": "c94bcf8c2a99",
+    "text": "ñ"
+  },
+  {
+    "id": "b7aa43dc8796",
+    "text": "ña"
+  },
+  {
+    "id": "174b60278ecb",
+    "text": "ñe"
+  },
+  {
+    "id": "0af42b596680",
+    "text": "ñi"
+  },
+  {
+    "id": "fc392a6c7696",
+    "text": "ño"
+  },
+  {
+    "id": "2c7cf0b8d7f9",
+    "text": "ñu"
+  },
+  {
+    "id": "7a81af3e591a",
+    "text": "o"
+  },
+  {
+    "id": "311047fbb074",
+    "text": "ocho"
+  },
+  {
+    "id": "2db9e0c62452",
+    "text": "ojo"
+  },
+  {
+    "id": "665b39a1e96a",
+    "text": "ol"
+  },
+  {
+    "id": "793f970c52de",
+    "text": "ola"
+  },
+  {
+    "id": "db3d405b1067",
+    "text": "on"
+  },
+  {
+    "id": "1758356db217",
+    "text": "or"
+  },
+  {
+    "id": "887dcbd1423f",
+    "text": "oreja"
+  },
+  {
+    "id": "999a3419d995",
+    "text": "os"
+  },
+  {
+    "id": "4dceb5c03676",
+    "text": "oso"
+  },
+  {
+    "id": "f712e00484ab",
+    "text": "Oso empieza con o."
+  },
+  {
+    "id": "516b9783fca5",
+    "text": "p"
+  },
+  {
+    "id": "379fc0d5299a",
+    "text": "pa"
+  },
+  {
+    "id": "95213d57ff5c",
+    "text": "pala"
+  },
+  {
+    "id": "6e399c7a03b3",
+    "text": "palo"
+  },
+  {
+    "id": "bb9a4ea59e05",
+    "text": "paloma"
+  },
+  {
+    "id": "bd2bd8216b9c",
+    "text": "pan"
+  },
+  {
+    "id": "2dcb5c9e1037",
+    "text": "Pan tiene an."
+  },
+  {
+    "id": "f722f20fc568",
+    "text": "papa"
+  },
+  {
+    "id": "bec5e7268a89",
+    "text": "papá"
+  },
+  {
+    "id": "b8f5c072c1ad",
+    "text": "Papá come arroz con pollo."
+  },
+  {
+    "id": "2c6deb5fa088",
+    "text": "Papá empieza con pa."
+  },
+  {
+    "id": "c76bbde38646",
+    "text": "Papá me da un beso de noche."
+  },
+  {
+    "id": "24488d8b4151",
+    "text": "Papá me da un globo."
+  },
+  {
+    "id": "deb5d081518c",
+    "text": "Papá me da un libro."
+  },
+  {
+    "id": "7907f56f9631",
+    "text": "Papá me da un paquete."
+  },
+  {
+    "id": "6f50b045e544",
+    "text": "Papá me da una carta."
+  },
+  {
+    "id": "3022f0fb9353",
+    "text": "Papá me lleva a la casa."
+  },
+  {
+    "id": "bca4d132fcb6",
+    "text": "Papá me mima."
+  },
+  {
+    "id": "f7c3b9d06a95",
+    "text": "Papá pisa la lata."
+  },
+  {
+    "id": "cdba5c021b51",
+    "text": "Papá toma café."
+  },
+  {
+    "id": "3f48b87a2a2e",
+    "text": "Papá toma helado."
+  },
+  {
+    "id": "f672787184a6",
+    "text": "Papá toma soda."
+  },
+  {
+    "id": "324d4910c15c",
+    "text": "Papá usa el foco."
+  },
+  {
+    "id": "676918d7d2f2",
+    "text": "Papá usa un zapato."
+  },
+  {
+    "id": "90b47886fac7",
+    "text": "Papá y yo hacemos una torta."
+  },
+  {
+    "id": "cb030c5eec3f",
+    "text": "papel"
+  },
+  {
+    "id": "77d26286474d",
+    "text": "paquete"
+  },
+  {
+    "id": "67c38611cafb",
+    "text": "pata"
+  },
+  {
+    "id": "269cb45d944e",
+    "text": "pato"
+  },
+  {
+    "id": "214eb6d6a149",
+    "text": "payaso"
+  },
+  {
+    "id": "1db828bcd41d",
+    "text": "pe"
+  },
+  {
+    "id": "58a250ea3638",
+    "text": "pelo"
+  },
+  {
+    "id": "ad661a0fbef8",
+    "text": "pelota"
+  },
+  {
+    "id": "8b05a1dfb155",
+    "text": "peluche"
+  },
+  {
+    "id": "c9c2708d92b2",
+    "text": "pera"
+  },
+  {
+    "id": "6139bdc23a06",
+    "text": "perro"
+  },
+  {
+    "id": "432e49fede12",
+    "text": "pescado"
+  },
+  {
+    "id": "b0c7efa6f3eb",
+    "text": "peso"
+  },
+  {
+    "id": "b02e5b66ace6",
+    "text": "pi"
+  },
+  {
+    "id": "415fad35c820",
+    "text": "pila"
+  },
+  {
+    "id": "48ad01da55fe",
+    "text": "piña"
+  },
+  {
+    "id": "f95bd39d9b19",
+    "text": "pipa"
+  },
+  {
+    "id": "37284fad5204",
+    "text": "pirata"
+  },
+  {
+    "id": "90d94ae30f3b",
+    "text": "piso"
+  },
+  {
+    "id": "d1584678f7f5",
+    "text": "pla"
+  },
+  {
+    "id": "d4a4de4fb966",
+    "text": "plato"
+  },
+  {
+    "id": "a6f2fc88559d",
+    "text": "pli"
+  },
+  {
+    "id": "75887bc137bd",
+    "text": "plo"
+  },
+  {
+    "id": "34dd26e27323",
+    "text": "pluma"
+  },
+  {
+    "id": "13a5d51391f6",
+    "text": "po"
+  },
+  {
+    "id": "0db6b74aff69",
+    "text": "pollo"
+  },
+  {
+    "id": "f3e41b35b534",
+    "text": "pra"
+  },
+  {
+    "id": "f03aa350a4cc",
+    "text": "pu"
+  },
+  {
+    "id": "16924b922bf3",
+    "text": "puerta"
+  },
+  {
+    "id": "1f3f390d900e",
+    "text": "pulpo"
+  },
+  {
+    "id": "d58099906c30",
+    "text": "puma"
+  },
+  {
+    "id": "f4dd46b081ff",
+    "text": "qu"
+  },
+  {
+    "id": "57b5ca459ef8",
+    "text": "que"
+  },
+  {
+    "id": "8e5fc65edb4d",
+    "text": "queso"
+  },
+  {
+    "id": "b43eff3fe1de",
+    "text": "Queso empieza con que."
+  },
+  {
+    "id": "61f611a4fd58",
+    "text": "qui"
+  },
+  {
+    "id": "4dc7c9ec434e",
+    "text": "r"
+  },
+  {
+    "id": "fb2b9eca64fd",
+    "text": "ra"
+  },
+  {
+    "id": "d432c3525b9d",
+    "text": "radio"
+  },
+  {
+    "id": "e75d16cf7574",
+    "text": "rama"
+  },
+  {
+    "id": "80c0ff172a69",
+    "text": "rana"
+  },
+  {
+    "id": "8f0cd70bf8c7",
+    "text": "Rana empieza con ra."
+  },
+  {
+    "id": "5ede3db02597",
+    "text": "rata"
+  },
+  {
+    "id": "c387c982a132",
+    "text": "re"
+  },
+  {
+    "id": "268013331b64",
+    "text": "ri"
+  },
+  {
+    "id": "eed1903a65fb",
+    "text": "ro"
+  },
+  {
+    "id": "364d297ac1c9",
+    "text": "roja"
+  },
+  {
+    "id": "af6c1a0ca271",
+    "text": "rojo"
+  },
+  {
+    "id": "5efc86ca883e",
+    "text": "rosa"
+  },
+  {
+    "id": "843cbacc61c8",
+    "text": "rr"
+  },
+  {
+    "id": "f4c41b0f349e",
+    "text": "rra"
+  },
+  {
+    "id": "e93f65b5f86c",
+    "text": "rre"
+  },
+  {
+    "id": "270cbf50368f",
+    "text": "rri"
+  },
+  {
+    "id": "65b08cea8346",
+    "text": "rro"
+  },
+  {
+    "id": "d6d050af35e4",
+    "text": "rroz"
+  },
+  {
+    "id": "d0eec8155ed4",
+    "text": "rru"
+  },
+  {
+    "id": "67b8b1c4fedb",
+    "text": "ru"
+  },
+  {
+    "id": "a0f1490a20d0",
+    "text": "s"
+  },
+  {
+    "id": "3608a6d1a05a",
+    "text": "sa"
+  },
+  {
+    "id": "9a2505d5dd7d",
+    "text": "sala"
+  },
+  {
+    "id": "be3c17bca758",
+    "text": "Salta, mueve las alas y sube."
+  },
+  {
+    "id": "83d485706c8b",
+    "text": "Salta, salta y salta."
+  },
+  {
+    "id": "d8d62af0f862",
+    "text": "sapo"
+  },
+  {
+    "id": "00762ccfa703",
+    "text": "se"
+  },
+  {
+    "id": "7dd9b3388122",
+    "text": "si"
+  },
+  {
+    "id": "5e06bd15f983",
+    "text": "sí"
+  },
+  {
+    "id": "86546b912bc5",
+    "text": "silla"
+  },
+  {
+    "id": "30933186d61f",
+    "text": "sirena"
+  },
+  {
+    "id": "cd1b646ebd1f",
+    "text": "so"
+  },
+  {
+    "id": "50eab3d432cc",
+    "text": "soda"
+  },
+  {
+    "id": "fbb93bb966c8",
+    "text": "sol"
+  },
+  {
+    "id": "9300376ce5a9",
+    "text": "Sol tiene ol."
+  },
+  {
+    "id": "4662abffddbc",
+    "text": "sopa"
+  },
+  {
+    "id": "4ade88b8c145",
+    "text": "Sopa empieza con so."
+  },
+  {
+    "id": "363eb224f6ff",
+    "text": "su"
+  },
+  {
+    "id": "8efd86fb78a5",
+    "text": "t"
+  },
+  {
+    "id": "00a6ba21da70",
+    "text": "ta"
+  },
+  {
+    "id": "9dc4319c27f6",
+    "text": "taco"
+  },
+  {
+    "id": "8a49b4314ffa",
+    "text": "tambor"
+  },
+  {
+    "id": "f2b09da9d27d",
+    "text": "taza"
+  },
+  {
+    "id": "33e9505d1294",
+    "text": "te"
+  },
+  {
+    "id": "9303fb5d2905",
+    "text": "teléfono"
+  },
+  {
+    "id": "b484fa1a7e07",
+    "text": "tesoro"
+  },
+  {
+    "id": "41c76e521817",
+    "text": "ti"
+  },
+  {
+    "id": "c557c8fce1c6",
+    "text": "tigre"
+  },
+  {
+    "id": "4374aaee247f",
+    "text": "to"
+  },
+  {
+    "id": "4715cfe35549",
+    "text": "Toca cada sílaba para escucharla."
+  },
+  {
+    "id": "70c99cf5d609",
+    "text": "Toca la letra para escucharla."
+  },
+  {
+    "id": "6a02e1b5a3fb",
+    "text": "Toca las sílabas y júntalas."
+  },
+  {
+    "id": "1bb66b5a1112",
+    "text": "Todos comemos torta."
+  },
+  {
+    "id": "13f20098aaeb",
+    "text": "tomate"
+  },
+  {
+    "id": "63e8d7ccba22",
+    "text": "Tomate empieza con to."
+  },
+  {
+    "id": "5c97f998cf70",
+    "text": "toro"
+  },
+  {
+    "id": "a006e3e5ba20",
+    "text": "torre"
+  },
+  {
+    "id": "85f750f1d8ea",
+    "text": "torta"
+  },
+  {
+    "id": "3be48e13e9b3",
+    "text": "tra"
+  },
+  {
+    "id": "11aa6adc7734",
+    "text": "tre"
+  },
+  {
+    "id": "15047c92a2c3",
+    "text": "tren"
+  },
+  {
+    "id": "79fdb32ff09a",
+    "text": "tro"
+  },
+  {
+    "id": "69bf76a9e4ff",
+    "text": "trompeta"
+  },
+  {
+    "id": "e5d9675cddda",
+    "text": "tru"
+  },
+  {
+    "id": "a3da4c6307d2",
+    "text": "tu"
+  },
+  {
+    "id": "224eb3b8e679",
+    "text": "Tú puedes. ¡Prueba de nuevo!"
+  },
+  {
+    "id": "51e69892ab49",
+    "text": "u"
+  },
+  {
+    "id": "1589fe079bb1",
+    "text": "ua"
+  },
+  {
+    "id": "8142c2e21be2",
+    "text": "ue"
+  },
+  {
+    "id": "636117b25f17",
+    "text": "ui"
+  },
+  {
+    "id": "8bf89849bbeb",
+    "text": "ul"
+  },
+  {
+    "id": "dd3bc42b2cbb",
+    "text": "un"
+  },
+  {
+    "id": "984ecde12a22",
+    "text": "Un dragón verde no sabía volar."
+  },
+  {
+    "id": "757a6ab7108e",
+    "text": "Un dragón verde vive en el cerro."
+  },
+  {
+    "id": "cb0821b10a9e",
+    "text": "un gato"
+  },
+  {
+    "id": "cdb1d1b977d0",
+    "text": "un mapa"
+  },
+  {
+    "id": "9fc8109c199f",
+    "text": "Un mono come mango."
+  },
+  {
+    "id": "26d34b4245a1",
+    "text": "un pato"
+  },
+  {
+    "id": "fb7face9a8d5",
+    "text": "Un pato pisa la pila."
+  },
+  {
+    "id": "618bd9e076cf",
+    "text": "un perro"
+  },
+  {
+    "id": "f1aec395889c",
+    "text": "un pez"
+  },
+  {
+    "id": "9a3dbd6496a2",
+    "text": "un taco"
+  },
+  {
+    "id": "7d078209f4fb",
+    "text": "un tren"
+  },
+  {
+    "id": "055c4d7b9b6c",
+    "text": "Una mariposa azul vuela cerca de Chispa."
+  },
+  {
+    "id": "5bc9f641eda3",
+    "text": "una moneda"
+  },
+  {
+    "id": "64978fe7cebd",
+    "text": "una mosca"
+  },
+  {
+    "id": "4c7a7b4030fa",
+    "text": "Una mosca pasa cerca."
+  },
+  {
+    "id": "5b19cbc2fc62",
+    "text": "una pera"
+  },
+  {
+    "id": "a153e798f3fd",
+    "text": "una piedra"
+  },
+  {
+    "id": "f87e12d47da9",
+    "text": "una rana"
+  },
+  {
+    "id": "cebe08ac0b5e",
+    "text": "una sopa"
+  },
+  {
+    "id": "c2ce35e4e9bc",
+    "text": "una torta"
+  },
+  {
+    "id": "c4b60047ce39",
+    "text": "una vaca"
+  },
+  {
+    "id": "f4cd59105097",
+    "text": "unicornio"
+  },
+  {
+    "id": "49520ffd6159",
+    "text": "uña"
+  },
+  {
+    "id": "7b21fdd90a60",
+    "text": "ur"
+  },
+  {
+    "id": "da2b128800d4",
+    "text": "us"
+  },
+  {
+    "id": "2d2c2a1400d9",
+    "text": "uva"
+  },
+  {
+    "id": "94b8ba019b41",
+    "text": "Uva empieza con u."
+  },
+  {
+    "id": "7a38d8cbd20d",
+    "text": "v"
+  },
+  {
+    "id": "665a4dc918dd",
+    "text": "va"
+  },
+  {
+    "id": "c0b3f2cd99ec",
+    "text": "vaca"
+  },
+  {
+    "id": "ec9f2a67ff9c",
+    "text": "Vaca empieza con va."
+  },
+  {
+    "id": "8abf5afa85f8",
+    "text": "Vamos a leerla juntos."
+  },
+  {
+    "id": "934cff2debe7",
+    "text": "ve"
+  },
+  {
+    "id": "88e2e097332f",
+    "text": "Ve la luna en el agua."
+  },
+  {
+    "id": "eb1c0d7aaf31",
+    "text": "vela"
+  },
+  {
+    "id": "2030abee0fb9",
+    "text": "verde"
+  },
+  {
+    "id": "833da188871d",
+    "text": "vi"
+  },
+  {
+    "id": "fadd56ec452f",
+    "text": "vo"
+  },
+  {
+    "id": "9510a0c1fd1b",
+    "text": "volar"
+  },
+  {
+    "id": "a29d050bee78",
+    "text": "vu"
+  },
+  {
+    "id": "95cb0bfd2977",
+    "text": "y"
+  },
+  {
+    "id": "e92fc4e26a76",
+    "text": "ya"
+  },
+  {
+    "id": "f5e47034a83e",
+    "text": "yate"
+  },
+  {
+    "id": "f94739373a5e",
+    "text": "ye"
+  },
+  {
+    "id": "48b3f8cdcb1b",
+    "text": "yi"
+  },
+  {
+    "id": "c41975d1dae1",
+    "text": "yo"
+  },
+  {
+    "id": "abefd9b11ca7",
+    "text": "Yo amo a mi papá."
+  },
+  {
+    "id": "f1d06894c24a",
+    "text": "Yo mimo a mi mamá."
+  },
+  {
+    "id": "6465f54adfd1",
+    "text": "Yo veo a mi mamá y a mi papá."
+  },
+  {
+    "id": "08d49ab65386",
+    "text": "Yo veo la luna."
+  },
+  {
+    "id": "c9d26c4af8d0",
+    "text": "Yo veo un pato."
+  },
+  {
+    "id": "3983219e37fc",
+    "text": "Yo veo una moto."
+  },
+  {
+    "id": "75ac343393e8",
+    "text": "Yo veo una rosa y una pera."
+  },
+  {
+    "id": "077454edf4bf",
+    "text": "yoyo"
+  },
+  {
+    "id": "57bb3faef506",
+    "text": "Yoyo empieza con yo."
+  },
+  {
+    "id": "62094dd800f8",
+    "text": "yu"
+  },
+  {
+    "id": "395df8f7c51f",
+    "text": "z"
+  },
+  {
+    "id": "85c9baff1521",
+    "text": "za"
+  },
+  {
+    "id": "d508dffa961b",
+    "text": "zapato"
+  },
+  {
+    "id": "da13da0c31ac",
+    "text": "Zapato empieza con za."
+  },
+  {
+    "id": "2a30b5bdc3f3",
+    "text": "ze"
+  },
+  {
+    "id": "1396bc8a5619",
+    "text": "zi"
+  },
+  {
+    "id": "aeda07913f53",
+    "text": "zo"
+  },
+  {
+    "id": "c7abcdc3c57e",
+    "text": "zorro"
+  },
+  {
+    "id": "e3abab127fc0",
+    "text": "zu"
+  }
+]

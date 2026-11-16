@@ -51,42 +51,122 @@ export function makeUtterance(text: string, rate = 0.88): SpeechSynthesisUtteran
   return utterance
 }
 
-export function speak(text: string, rate = 0.88) {
-  if (!supported() || !enabled || !text.trim()) return
-  queueToken += 1
-  window.speechSynthesis.cancel()
-  const utterance = makeUtterance(text, rate)
-  window.speechSynthesis.speak(utterance)
+// ---------- Voces grabadas por la familia ----------
+// Si existe una grabación para el texto, se usa en lugar de la voz del navegador.
+const recorded = new Map<string, string>()
+let currentAudio: HTMLAudioElement | null = null
+
+/** Clave de una grabación: el texto en minúsculas y sin signos. */
+export function audioKey(text: string): string {
+  return text
+    .toLowerCase()
+    .normalize('NFC')
+    .replace(/[¿?¡!.,;:"“”]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim()
 }
 
-export function speakQueue(texts: string[], rate = 0.88) {
-  if (!supported() || !enabled) return
-  queueToken += 1
+export async function loadRecordedAudio(): Promise<void> {
+  try {
+    const response = await fetch('/api/audio')
+    if (!response.ok) return
+    const rows = (await response.json()) as { key: string; updatedAt: string }[]
+    recorded.clear()
+    rows.forEach((row) => recorded.set(row.key, row.updatedAt))
+  } catch {
+    /* sin conexión: se usa la voz del navegador */
+  }
+}
+
+export function hasRecording(text: string): boolean {
+  return recorded.has(audioKey(text))
+}
+
+export function recordingUrl(text: string): string | null {
+  const key = audioKey(text)
+  const version = recorded.get(key)
+  return version ? `/api/audio/${encodeURIComponent(key)}?v=${encodeURIComponent(version)}` : null
+}
+
+function stopAudio() {
+  if (currentAudio) {
+    currentAudio.onended = null
+    currentAudio.onerror = null
+    currentAudio.pause()
+    currentAudio = null
+  }
+}
+
+/** Dice un texto (grabación si existe; si no, voz del navegador) y avisa al terminar. */
+function sayOne(text: string, rate: number, done: () => void) {
+  const url = recordingUrl(text)
+  const viaTts = () => {
+    if (!supported()) {
+      done()
+      return
+    }
+    const utterance = makeUtterance(text, rate)
+    utterance.onend = done
+    utterance.onerror = done
+    window.speechSynthesis.speak(utterance)
+  }
+  if (!url) {
+    viaTts()
+    return
+  }
+  const audio = new Audio(url)
+  currentAudio = audio
+  audio.onended = () => {
+    if (currentAudio === audio) currentAudio = null
+    done()
+  }
+  audio.onerror = () => {
+    if (currentAudio === audio) currentAudio = null
+    viaTts()
+  }
+  audio.play().catch(() => {
+    if (currentAudio === audio) currentAudio = null
+    viaTts()
+  })
+}
+
+export function speak(text: string, rate = 0.88) {
+  if (!enabled || !text.trim()) return
+  stopSpeaking()
+  sayOne(text, rate, () => undefined)
+}
+
+/** Dice varios textos seguidos. `onItem` avisa cuál empieza (y -1 al terminar). */
+export function speakQueue(texts: string[], rate = 0.88, onItem?: (index: number) => void) {
+  if (!enabled) return
+  stopSpeaking()
   const token = queueToken
-  window.speechSynthesis.cancel()
   let index = 0
 
   const next = () => {
-    if (token !== queueToken || index >= texts.length) return
+    if (token !== queueToken) return
+    if (index >= texts.length) {
+      onItem?.(-1)
+      return
+    }
+    const current = index
     const text = texts[index]
     index += 1
     if (!text?.trim()) {
       next()
       return
     }
-    const utterance = makeUtterance(text, rate)
-    utterance.onend = () => window.setTimeout(next, 160)
-    utterance.onerror = () => window.setTimeout(next, 160)
-    window.speechSynthesis.speak(utterance)
+    onItem?.(current)
+    sayOne(text, rate, () => window.setTimeout(next, 160))
   }
 
   next()
 }
 
 export function stopSpeaking() {
-  if (!supported()) return
   queueToken += 1
-  window.speechSynthesis.cancel()
+  stopAudio()
+  if (supported()) window.speechSynthesis.cancel()
 }
 
 export function speechAvailable(): boolean {

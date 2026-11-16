@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
 import { IconButton, ProgressBar, Stars, TopBar } from '../components/Chrome'
-import { Pikachu } from '../components/Pikachu'
+import { Chispa } from '../components/Chispa'
+import { buildReview, reachedDailyLimit, REVIEW_MIN } from '../lib/session'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
@@ -25,6 +26,9 @@ export function MapPage() {
     const needed = Math.ceil(previous.lessons.length * 0.7)
     return completedLessons(previous.id) >= needed
   }
+
+  const reviewCount = buildReview(content, data?.trouble ?? []).length
+  const resting = reachedDailyLimit(data?.todaySeconds ?? 0)
 
   const currentIndex = content.findIndex(
     (world, index) =>
@@ -52,7 +56,7 @@ export function MapPage() {
         initial={{ y: 16, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
       >
-        <Pikachu size={84} mood="cheer" bounce />
+        <Chispa size={84} mood="cheer" bounce />
         <div className="min-w-0 flex-1">
           <h2 className="truncate font-display text-2xl">¡Hola, {profile?.name}!</h2>
           <p className="text-sm font-bold text-ink/55">
@@ -73,6 +77,37 @@ export function MapPage() {
           </div>
         </div>
       </motion.div>
+
+      {resting && (
+        <div className="mx-4 mt-3 rounded-[2rem] bg-sky/25 p-4 text-center">
+          <p className="font-display text-xl">😴 ¡Hoy ya leíste mucho!</p>
+          <p className="text-sm font-bold text-ink/55">Chispa está descansando. Mañana seguimos.</p>
+        </div>
+      )}
+
+      {reviewCount >= REVIEW_MIN && !resting && (
+        <motion.button
+          type="button"
+          onClick={() => {
+            sfx.click()
+            navigate('/repaso')
+          }}
+          initial={{ y: 12, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="card mx-4 mt-3 flex items-center gap-3 border-4 border-white p-4 text-left ring-4 ring-mint/50"
+        >
+          <span className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-mint/30 text-3xl">
+            🔁
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="block font-display text-xl leading-tight">Repaso de hoy</span>
+            <span className="block text-xs font-bold text-ink/50">
+              {reviewCount} cosas para practicar otra vez
+            </span>
+          </span>
+          <span className="shrink-0 text-xl">▶️</span>
+        </motion.button>
+      )}
 
       <div className="relative mx-4 mt-5 flex flex-col gap-4">
         <div className="absolute bottom-8 left-[38px] top-8 w-1 rounded-full bg-ink/10" />

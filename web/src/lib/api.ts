@@ -1,5 +1,6 @@
 import type {
   CompleteResult,
+  Mistake,
   ParentSummary,
   Profile,
   ProgressData,
@@ -36,9 +37,21 @@ export const api = {
   progress: (profileId: number) => request<ProgressData>(`/api/progress/${profileId}`),
   completeLesson: (
     lessonId: string,
-    body: { profileId: number; stars: number; correct: number; total: number; seconds: number }
+    body: {
+      profileId: number
+      stars: number
+      correct: number
+      total: number
+      seconds: number
+      mistakes?: Mistake[]
+    }
   ) =>
     request<CompleteResult>(`/api/lessons/${lessonId}/complete`, {
+      method: 'POST',
+      body: JSON.stringify(body)
+    }),
+  completeReview: (body: { profileId: number; seconds: number; mistakes: Mistake[]; solved: Mistake[] }) =>
+    request<CompleteResult>('/api/review/complete', {
       method: 'POST',
       body: JSON.stringify(body)
     }),
