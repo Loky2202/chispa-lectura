@@ -105,8 +105,18 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
       setPhase('recording')
       // Se detiene sola: una sílaba no necesita más de unos segundos.
       stopTimerRef.current = window.setTimeout(stop, text.length <= 4 ? 2500 : 4000)
-    } catch {
-      setError('No hay permiso para usar el micrófono.')
+    } catch (cause) {
+      // El navegador dice por qué falló: sin eso no se sabe si es permiso, aparato o sistema.
+      const name = cause instanceof DOMException ? cause.name : ''
+      setError(
+        name === 'NotFoundError' || name === 'OverconstrainedError'
+          ? 'No se encontró ningún micrófono. Conecta uno y revisa que Windows lo reconozca.'
+          : name === 'NotReadableError' || name === 'AbortError'
+            ? 'El micrófono está ocupado o Windows lo bloquea. Cierra otras apps que lo usen y revisa Configuración → Privacidad → Micrófono.'
+            : name === 'NotAllowedError' || name === 'SecurityError'
+              ? 'El navegador tiene bloqueado el micrófono para esta página. Toca el icono a la izquierda de la dirección y permite el micrófono.'
+              : `No se pudo usar el micrófono${name ? ` (${name})` : ''}.`
+      )
       setPhase('idle')
     }
   }
