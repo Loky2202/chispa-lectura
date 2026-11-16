@@ -401,6 +401,70 @@ export function ParentsPage() {
                 <p className="text-[10px] font-extrabold uppercase text-ink/45">Tiempo</p>
               </div>
             </div>
+            {summary.week && (
+              <div className="mt-3 rounded-2xl bg-cream/80 p-3">
+                <p className="text-[10px] font-extrabold uppercase text-ink/45">Esta semana</p>
+                <div
+                  className="mt-2 flex h-20 items-end gap-1.5"
+                  role="img"
+                  aria-label={`Minutos por día: ${summary.week.days
+                    .map((day) => Math.round(day.seconds / 60))
+                    .join(', ')}`}
+                >
+                  {summary.week.days.map((day) => {
+                    const peak = Math.max(600, ...summary.week!.days.map((item) => item.seconds))
+                    const minutes = Math.round(day.seconds / 60)
+                    return (
+                      <div key={day.day} className="flex h-full flex-1 flex-col items-center justify-end gap-0.5">
+                        <span className="text-[10px] font-extrabold text-ink/50">{minutes > 0 ? minutes : ''}</span>
+                        <div
+                          className={cn('w-full rounded-t-lg', day.seconds > 0 ? 'bg-mint' : 'bg-ink/10')}
+                          style={{ height: `${Math.max(6, (day.seconds / peak) * 70)}%` }}
+                        />
+                        <span className="text-[10px] font-bold uppercase text-ink/45">
+                          {new Date(`${day.day}T12:00:00`).toLocaleDateString('es-MX', { weekday: 'narrow' })}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+                <p className="mt-2 text-xs font-bold text-ink/60">
+                  {formatMinutes(summary.week.days.reduce((sum, day) => sum + day.seconds, 0))} en{' '}
+                  {summary.week.days.filter((day) => day.seconds > 0).length} de 7 días ·{' '}
+                  {summary.week.lessonsPlayed} {summary.week.lessonsPlayed === 1 ? 'lección' : 'lecciones'} ·{' '}
+                  {summary.week.mistakes} {summary.week.mistakes === 1 ? 'error' : 'errores'}
+                </p>
+              </div>
+            )}
+            {(summary.letters?.length ?? 0) > 0 && (
+              <div className="mt-3 rounded-2xl bg-cream/80 p-3">
+                <p className="text-[10px] font-extrabold uppercase text-ink/45">Letras que ya practicó</p>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  {summary.letters?.map((entry) => (
+                    <span
+                      key={entry.letter}
+                      title={`${entry.practiced} sílabas practicadas, ${entry.errors} errores sin resolver`}
+                      className={cn(
+                        'flex h-10 min-w-10 items-center justify-center rounded-xl px-2 font-display text-lg',
+                        entry.errors >= 3
+                          ? 'bg-coral/30'
+                          : entry.errors > 0
+                            ? 'bg-pika/60'
+                            : 'bg-mint/40'
+                      )}
+                    >
+                      {entry.letter}
+                      {entry.errors > 0 && (
+                        <span className="ml-1 text-[10px] font-extrabold text-ink/60">{entry.errors}</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+                <p className="mt-2 text-[11px] font-semibold text-ink/45">
+                  Verde = va bien · amarillo = 1 o 2 errores sin resolver · rojo = 3 o más.
+                </p>
+              </div>
+            )}
             {(summary.confusions?.length ?? 0) > 0 && (
               <div className="mt-3 rounded-2xl bg-cream/80 p-3">
                 <p className="text-[10px] font-extrabold uppercase text-ink/45">

@@ -205,8 +205,8 @@ Todos los dibujos del contenido son emojis.
 
 ## 🧭 Roadmap
 
-- [ ] Audios pregrabados para tablets sin voz en español.
+- [x] Audios pregrabados: se graban o se importan en bloque desde la zona de Padres.
 - [ ] Más juegos de atención y memoria.
-- [ ] Reporte semanal para padres.
+- [x] Reporte semanal y mapa de letras en la zona de Padres.
 - [ ] Modo “Mis palabras” con fotos de la familia.
 - [ ] Sincronización entre dispositivos.

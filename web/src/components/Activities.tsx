@@ -232,6 +232,7 @@ function PictureChoices({
           type="button"
           whileTap={{ scale: 0.94 }}
           onClick={() => choose(option.label)}
+          aria-label={option.label}
           className={cn(
             'card flex flex-col items-center gap-1 border-4 border-white p-3 pt-4 transition',
             right === option.label && 'bg-mint/20 ring-4 ring-mint',

@@ -58,7 +58,8 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
 
 - `server/src/index.js`: todas las rutas Fastify, estáticos de `web/dist` y fallback
   SPA (los 404 de `/api/` son aparte). `db.js`: esquema y seed. `rewards.js`: catálogo
-  de coches, stickers y medallas.
+  de coches, stickers y medallas fijas; además hay una medalla por mundo completado
+  (`mundo-<id>`, se arma desde la tabla `worlds`). Las medallas se ven en el Garaje.
 - `web/src/App.tsx`: rutas. `components/Activities.tsx`: switch de los 14 tipos de
   actividad. `lib/store.ts`: Zustand + caché en localStorage + cola offline.
   `types.ts`: contrato del contenido.
@@ -140,6 +141,10 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
 
 ## Estilo
 
+- Los iconos PNG de `web/public/` (192, 512, maskable y `apple-touch-icon`) salen de
+  `icon.svg`; si cambias el SVG, vuelve a generarlos. El maskable lleva el dibujo al 80 %.
+- Respeta `prefers-reduced-motion` (bloque al final de `web/src/index.css` y
+  `MotionConfig` en `main.tsx`): una pista no puede depender solo de una animación.
 - Tailwind v4 sin `tailwind.config.*`; los tokens viven en `web/src/index.css`
   (`pika`, `ink`, `cream`, `mint`, `grape`, `coral`, `sky`).
 - Prioridad tablet: botones grandes, sin anuncios, sin castigos por error.

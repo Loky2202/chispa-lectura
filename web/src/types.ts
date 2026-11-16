@@ -227,6 +227,8 @@ export interface ProgressData {
   progress: Record<string, ProgressEntry>
   badges: Badge[]
   unlocks: string[]
+  /** Todas las medallas que existen (para mostrar también las que faltan). */
+  badgeCatalog?: { code: string; name: string; emoji: string }[]
   trouble?: Trouble[]
   lessonsCompleted: number
   totalStars: number
@@ -276,4 +278,8 @@ export interface ParentSummary {
   energy: number
   lastPlayed: string | null
   confusions?: Confusion[]
+  /** Últimos 7 días (el último es hoy). */
+  week?: { days: { day: string; seconds: number }[]; lessonsPlayed: number; mistakes: number }
+  /** Sílabas practicadas y errores sin resolver por letra. */
+  letters?: { letter: string; practiced: number; errors: number }[]
 }

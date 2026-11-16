@@ -14,14 +14,16 @@ export function GaragePage() {
   const data = useStore((state) => state.data)
   const unlock = useStore((state) => state.unlock)
 
-  const [tab, setTab] = useState<'car' | 'sticker'>('car')
+  const [tab, setTab] = useState<'car' | 'sticker' | 'badge'>('car')
   const [selected, setSelected] = useState<Reward | null>(null)
   const [busy, setBusy] = useState(false)
   const [toast, setToast] = useState<string | null>(null)
 
   const cars = rewards.filter((reward) => reward.type === 'car')
   const stickers = rewards.filter((reward) => reward.type === 'sticker')
-  const items = tab === 'car' ? cars : stickers
+  const items = tab === 'car' ? cars : tab === 'sticker' ? stickers : []
+  const earned = new Set(data?.badges.map((badge) => badge.code) ?? [])
+  const badges = data?.badgeCatalog ?? data?.badges ?? []
   const owned = (id: string) => data?.unlocks.includes(id) ?? false
   const ownedCars = cars.filter((reward) => owned(reward.id)).length
   const ownedStickers = stickers.filter((reward) => owned(reward.id)).length
@@ -61,7 +63,7 @@ export function GaragePage() {
         </div>
       </div>
 
-      <div className="mx-4 mt-3 grid grid-cols-2 gap-2">
+      <div className="mx-4 mt-3 grid grid-cols-3 gap-2">
         <button
           type="button"
           onClick={() => {
@@ -69,7 +71,7 @@ export function GaragePage() {
             setTab('car')
           }}
           className={cn(
-            'btn h-12 text-base',
+            'btn h-12 text-sm sm:text-base',
             tab === 'car' ? 'btn-primary' : 'btn-white'
           )}
         >
@@ -82,13 +84,51 @@ export function GaragePage() {
             setTab('sticker')
           }}
           className={cn(
-            'btn h-12 text-base',
+            'btn h-12 text-sm sm:text-base',
             tab === 'sticker' ? 'btn-primary' : 'btn-white'
           )}
         >
           ✨ Stickers
         </button>
+        <button
+          type="button"
+          onClick={() => {
+            sfx.click()
+            setTab('badge')
+          }}
+          className={cn('btn h-12 text-sm sm:text-base', tab === 'badge' ? 'btn-primary' : 'btn-white')}
+        >
+          🏅 Medallas
+        </button>
       </div>
+
+      {tab === 'badge' && (
+        <>
+          <p className="mx-5 mt-3 text-sm font-bold text-ink/55">
+            Tienes {earned.size} de {badges.length} medallas. Se ganan leyendo, no con monedas.
+          </p>
+          <div className="mx-4 mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {badges.map((badge) => {
+              const has = earned.has(badge.code)
+              return (
+                <div
+                  key={badge.code}
+                  className={cn(
+                    'card flex flex-col items-center gap-1 border-4 border-white p-3 text-center',
+                    has ? 'bg-pika/20' : 'opacity-60'
+                  )}
+                >
+                  <span className={cn('text-5xl', !has && 'grayscale')}>{badge.emoji}</span>
+                  <span className="text-xs font-bold leading-tight text-ink/70">{badge.name}</span>
+                  <span className="rounded-full bg-white px-2 py-0.5 text-[10px] font-extrabold text-ink/60">
+                    {has ? '✅ Ganada' : '🔒 Por ganar'}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+        </>
+      )}
 
       <div className="mx-4 mt-3 grid grid-cols-2 gap-3 sm:grid-cols-3">
         {items.map((reward) => {

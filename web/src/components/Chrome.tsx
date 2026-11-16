@@ -1,12 +1,12 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import type { ReactNode } from 'react'
+import { useEffect, type ReactNode } from 'react'
 import { useStore } from '../lib/store'
 import { cn } from '../lib/utils'
 import { Chispa } from './Chispa'
 
 export function Backdrop() {
   return (
-    <div className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
+    <div aria-hidden="true" className="pointer-events-none fixed inset-0 -z-10 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-b from-[#FFF6D6] via-[#E8FAFF] to-[#FFF0F5]" />
       <div className="absolute -left-24 top-8 h-64 w-64 rounded-full bg-pika/40 blur-3xl" />
       <div className="absolute -right-20 top-1/3 h-72 w-72 rounded-full bg-mint/30 blur-3xl" />
@@ -101,7 +101,13 @@ export function ProgressBar({
 }) {
   const percent = Math.max(0, Math.min(100, Math.round(value * 100)))
   return (
-    <div className={cn('h-4 w-full overflow-hidden rounded-full bg-white/80', className)}>
+    <div
+      role="progressbar"
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={percent}
+      className={cn('h-4 w-full overflow-hidden rounded-full bg-white/80', className)}
+    >
       <motion.div
         className={cn('h-full rounded-full bg-mint', barClassName)}
         initial={{ width: 0 }}
@@ -169,6 +175,15 @@ export function Modal({
   title?: string
   children: ReactNode
 }) {
+  useEffect(() => {
+    if (!open) return
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [open, onClose])
+
   return (
     <AnimatePresence>
       {open && (
@@ -180,6 +195,9 @@ export function Modal({
           onClick={onClose}
         >
           <motion.div
+            role="dialog"
+            aria-modal="true"
+            aria-label={title}
             className="w-full max-w-md rounded-[2rem] bg-white p-6 shadow-2xl"
             initial={{ y: 60, scale: 0.95 }}
             animate={{ y: 0, scale: 1 }}
@@ -220,6 +238,8 @@ export function Toast({ message }: { message: string | null }) {
     <AnimatePresence>
       {message && (
         <motion.div
+          role="status"
+          aria-live="polite"
           className="fixed bottom-6 left-1/2 z-50 -translate-x-1/2 rounded-2xl bg-ink px-5 py-3 text-center text-sm font-bold text-white shadow-xl"
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

@@ -283,6 +283,114 @@ function getProfile(profileId) {
   return db.prepare('SELECT * FROM profiles WHERE id = ?').get(profileId)
 }
 
+// Medallas fijas (rewards.js) más una por cada mundo completado (mundo-<id>).
+const WORLD_BADGE = 'mundo-'
+
+function badgeInfo(code) {
+  if (BADGES[code]) return BADGES[code]
+  if (code.startsWith(WORLD_BADGE)) {
+    const world = db.prepare('SELECT title, emoji FROM worlds WHERE id = ?').get(code.slice(WORLD_BADGE.length))
+    if (world) return { name: world.title, emoji: world.emoji }
+  }
+  return { name: 'Medalla', emoji: '🏅' }
+}
+
+function badgeCatalog() {
+  const fixed = Object.entries(BADGES).map(([code, badge]) => ({ code, ...badge }))
+  const worlds = db
+    .prepare('SELECT id, title, emoji FROM worlds ORDER BY sort')
+    .all()
+    .map((world) => ({ code: WORLD_BADGE + world.id, name: world.title, emoji: world.emoji }))
+  return [...fixed, ...worlds]
+}
+
+function completedWorlds(profileId) {
+  return db
+    .prepare(
+      `SELECT w.id FROM worlds w
+       WHERE (SELECT COUNT(*) FROM lessons l WHERE l.world_id = w.id) > 0
+         AND (SELECT COUNT(*) FROM lessons l WHERE l.world_id = w.id) =
+             (SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id
+              WHERE p.profile_id = ? AND l.world_id = w.id AND p.stars > 0)`
+    )
+    .all(profileId)
+    .map((row) => row.id)
+}
+
+// ---------- Reporte para Padres ----------
+// Últimos 7 días: segundos por día, lecciones jugadas y errores.
+function getWeek(profileId) {
+  const today = todayStr()
+  const seconds = new Map(
+    db
+      .prepare('SELECT day, seconds FROM daily WHERE profile_id = ? AND day >= ?')
+      .all(profileId, shiftDay(today, -6))
+      .map((row) => [row.day, row.seconds])
+  )
+  const days = []
+  for (let back = 6; back >= 0; back -= 1) {
+    const day = shiftDay(today, -back)
+    days.push({ day, seconds: seconds.get(day) ?? 0 })
+  }
+  const since = new Date(Date.now() - 7 * 86400000).toISOString()
+  const count = (table) =>
+    db.prepare(`SELECT COUNT(*) AS c FROM ${table} WHERE profile_id = ? AND created_at >= ?`).get(profileId, since).c
+  return { days, lessonsPlayed: count('attempts'), mistakes: count('mistakes') }
+}
+
+const VOWELS = 'aeiouáéíóúü'
+const DIGRAPHS = ['ch', 'll', 'rr', 'qu']
+
+// Letra a la que pertenece una sílaba: su primera consonante (o dígrafo); si no tiene, la vocal.
+function letterKey(text) {
+  const s = String(text).toLowerCase()
+  for (let i = 0; i < s.length; i += 1) {
+    if (DIGRAPHS.includes(s.slice(i, i + 2))) return s.slice(i, i + 2)
+    if (/\p{L}/u.test(s[i]) && !VOWELS.includes(s[i])) return s[i]
+  }
+  const first = s.normalize('NFD')[0] ?? ''
+  return /[a-z]/.test(first) ? first : ''
+}
+
+// Mapa de letras: cuántas sílabas de cada letra ya practicó (lecciones completadas)
+// y cuántos errores de letra o sílaba siguen sin resolver.
+function getLetters(profileId) {
+  const practiced = new Map()
+  const note = (text) => {
+    if (typeof text !== 'string' || !text || text.length > 4 || /\s/.test(text)) return
+    const key = letterKey(text)
+    if (!key) return
+    if (!practiced.has(key)) practiced.set(key, new Set())
+    practiced.get(key).add(text.toLowerCase())
+  }
+  const lessons = db
+    .prepare('SELECT l.activities FROM progress p JOIN lessons l ON l.id = p.lesson_id WHERE p.profile_id = ?')
+    .all(profileId)
+  for (const lesson of lessons) {
+    for (const activity of JSON.parse(lesson.activities)) {
+      if (activity.type === 'learn') {
+        note(activity.letter)
+        activity.syllables?.forEach(note)
+      } else if (activity.type === 'listen_tap') note(activity.answer)
+      else if (activity.type === 'blend') activity.parts?.forEach(note)
+    }
+  }
+  const errors = new Map()
+  const rows = db
+    .prepare(
+      `SELECT item, COUNT(*) AS c FROM mistakes
+       WHERE profile_id = ? AND resolved = 0 AND kind IN ('letter', 'syllable') GROUP BY item`
+    )
+    .all(profileId)
+  for (const row of rows) {
+    const key = letterKey(row.item)
+    if (key) errors.set(key, (errors.get(key) ?? 0) + row.c)
+  }
+  return [...new Set([...practiced.keys(), ...errors.keys()])]
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .map((letter) => ({ letter, practiced: practiced.get(letter)?.size ?? 0, errors: errors.get(letter) ?? 0 }))
+}
+
 function awardBadges(profileId, summary) {
   const earned = new Set(
     db
@@ -299,13 +407,29 @@ function awardBadges(profileId, summary) {
   add('cinco-lecciones', summary.lessonsCompleted >= 5)
   add('diez-lecciones', summary.lessonsCompleted >= 10)
   add('veinte-lecciones', summary.lessonsCompleted >= 20)
+  add('treinta-lecciones', summary.lessonsCompleted >= 30)
+  add('cincuenta-lecciones', summary.lessonsCompleted >= 50)
+  const totalLessons = db.prepare('SELECT COUNT(*) AS c FROM lessons').get().c
+  add('todas-lecciones', totalLessons > 0 && summary.lessonsCompleted >= totalLessons)
   add('monedas-100', (getProfile(profileId)?.coins ?? 0) >= 100)
 
   const perfect = db
     .prepare('SELECT COUNT(*) AS c FROM progress WHERE profile_id = ? AND stars = 3')
     .get(profileId)
   add('perfecto', perfect.c >= 1)
+  add('diez-perfectas', perfect.c >= 10)
   add('tres-dias', summary.streak >= 3)
+  add('siete-dias', summary.streak >= 7)
+  add('catorce-dias', summary.streak >= 14)
+
+  const fixed = db
+    .prepare(
+      'SELECT COUNT(*) AS c FROM (SELECT DISTINCT kind, item FROM mistakes WHERE profile_id = ? AND resolved = 1)'
+    )
+    .get(profileId)
+  add('repaso-5', fixed.c >= 5)
+  add('repaso-15', fixed.c >= 15)
+  for (const worldId of completedWorlds(profileId)) add(WORLD_BADGE + worldId, true)
 
   const worlds = db.prepare('SELECT id FROM worlds').all()
   const worldComplete = worlds.some((world) => {
@@ -328,7 +452,7 @@ function awardBadges(profileId, summary) {
   )
   const now = new Date().toISOString()
   candidates.forEach((code) => insert.run(profileId, code, now))
-  return candidates.map((code) => ({ code, ...BADGES[code] }))
+  return candidates.map((code) => ({ code, ...badgeInfo(code) }))
 }
 
 const app = Fastify({ logger: true, trustProxy: true })
@@ -377,7 +501,7 @@ app.get('/api/progress/:profileId', async (request, reply) => {
   const badges = db
     .prepare('SELECT code, earned_at FROM badges WHERE profile_id = ?')
     .all(profileId)
-    .map((row) => ({ code: row.code, earnedAt: row.earned_at, ...BADGES[row.code] }))
+    .map((row) => ({ code: row.code, earnedAt: row.earned_at, ...badgeInfo(row.code) }))
 
   const unlocks = db
     .prepare('SELECT item_id, unlocked_at FROM unlocks WHERE profile_id = ?')
@@ -389,6 +513,7 @@ app.get('/api/progress/:profileId', async (request, reply) => {
     progress,
     badges,
     unlocks,
+    badgeCatalog: badgeCatalog(),
     trouble: getTrouble(profileId),
     ...getSummary(profileId)
   }
@@ -501,7 +626,7 @@ app.post('/api/review/complete', async (request, reply) => {
     ok: true,
     coinsEarned,
     totalCoins: getProfile(profileId).coins,
-    newBadges: [],
+    newBadges: awardBadges(profileId, getSummary(profileId)),
     ...getSummary(profileId)
   })
 })
@@ -655,7 +780,14 @@ app.get('/api/parents/summary', parentOnly, async () => {
     const last = db
       .prepare('SELECT MAX(completed_at) AS last FROM progress WHERE profile_id = ?')
       .get(profile.id)
-    return { ...profile, ...summary, lastPlayed: last?.last ?? null, confusions: getConfusions(profile.id) }
+    return {
+      ...profile,
+      ...summary,
+      lastPlayed: last?.last ?? null,
+      confusions: getConfusions(profile.id),
+      week: getWeek(profile.id),
+      letters: getLetters(profile.id)
+    }
   })
 })
 
