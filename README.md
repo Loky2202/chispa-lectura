@@ -93,6 +93,12 @@ Te dará una URL `https://algo.trycloudflare.com`. Ábrela en la tablet y agrég
 
 ---
 
+## 🏠 En un servidor de casa
+
+Para dejarla encendida siempre en un servidor Ubuntu, con HTTPS privado para la tablet (micrófono e instalación como app sin túneles públicos), sigue [docs/SERVIDOR.md](docs/SERVIDOR.md).
+
+---
+
 ## 🛠️ Desarrollo local (sin Docker)
 
 Servidor (API + estáticos):

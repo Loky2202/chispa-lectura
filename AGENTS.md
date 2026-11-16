@@ -75,7 +75,7 @@ regenerados. Las pruebas del servidor nunca tocan `data/lectura.db`.
   `tools/docs.mjs`: documentación y manifiesto de audio.
 - `content/legacy/worlds.legacy.json`: los dos primeros mundos (bosque, vocales).
 - `content/worlds.json`, `docs/CURRICULO.md` y `content/audio/manifest.json` son
-  generados. `content/audio/` solo trae manifiesto y líneas para grabación futura; la
+  generados. `docs/SERVIDOR.md` sí se escribe a mano (despliegue en servidor con Tailscale). `content/audio/` solo trae manifiesto y líneas para grabación futura; la
   app usa TTS.
 - `content/tools/build.mjs` es determinista: usa un RNG con semilla. Si regeneras sin
   cambiar el currículo, el diff debería ser vacío.
