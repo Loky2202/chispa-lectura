@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { Modal, Toast, TopBar } from '../components/Chrome'
 import { Chispa } from '../components/Chispa'
 import { VoiceRecorder } from '../components/VoiceRecorder'
-import { api } from '../lib/api'
+import { api, ApiError } from '../lib/api'
 import { DAILY_OPTIONS, getDailyLimit, setDailyLimit } from '../lib/session'
 import { sfx } from '../lib/sfx'
 import { useStore } from '../lib/store'
@@ -26,7 +26,17 @@ function describe(confusion: Confusion): string {
   }
 }
 
-type Gate = 'hold' | 'math' | 'open'
+type Gate = 'hold' | 'math' | 'pin' | 'newpin' | 'open'
+
+/** Suma al azar con llevada: cambia cada vez, para que no se aprenda de memoria. */
+function makeSum() {
+  const pick = (min: number, max: number) => min + Math.floor(Math.random() * (max - min + 1))
+  const a = pick(6, 9)
+  const b = pick(5, 9)
+  const answer = a + b
+  const wrong = [answer - 2, answer + 2, answer - 1, answer + 1, answer + 10].sort(() => Math.random() - 0.5).slice(0, 2)
+  return { a, b, answer, options: [answer, ...wrong].sort(() => Math.random() - 0.5) }
+}
 
 export function ParentsPage() {
   const navigate = useNavigate()
@@ -34,6 +44,12 @@ export function ParentsPage() {
   const [gate, setGate] = useState<Gate>('hold')
   const [holdProgress, setHoldProgress] = useState(0)
   const [mathWrong, setMathWrong] = useState(false)
+  const [sum, setSum] = useState(makeSum)
+  const [pin, setPin] = useState('')
+  const [pinAgain, setPinAgain] = useState('')
+  const [pinError, setPinError] = useState<string | null>(null)
+  const [pinBusy, setPinBusy] = useState(false)
+  const [changingPin, setChangingPin] = useState(false)
   const [summaries, setSummaries] = useState<ParentSummary[]>([])
   const [loading, setLoading] = useState(false)
   const [resetTarget, setResetTarget] = useState<ParentSummary | null>(null)
@@ -58,10 +74,73 @@ export function ParentsPage() {
     try {
       const data = await api.parents()
       setSummaries(data)
-    } catch {
+    } catch (error) {
+      if (expired(error)) return
       setToast('No se pudo cargar la información')
     } finally {
       setLoading(false)
+    }
+  }
+
+  // La sesión de Padres caduca (o el servidor se reinició): se vuelve a pedir el PIN.
+  const expired = (error: unknown) => {
+    if (!(error instanceof ApiError) || (error.status !== 401 && error.status !== 403)) return false
+    api.parentLogout()
+    setVoices(false)
+    setPin('')
+    setPinAgain('')
+    setPinError(null)
+    setGate(error.status === 403 ? 'newpin' : 'pin')
+    return true
+  }
+
+  // Tras mantener pulsado: con PIN creado se pide el PIN; sin PIN, la suma y luego crearlo.
+  const afterHold = async () => {
+    try {
+      const status = await api.parentStatus()
+      setGate(status.authed ? 'open' : status.hasPin ? 'pin' : 'math')
+    } catch {
+      setToast('La zona de Padres necesita conexión con el servidor')
+      setHoldProgress(0)
+    }
+  }
+
+  const submitPin = async () => {
+    if (pinBusy) return
+    if (!/^\d{4,8}$/.test(pin)) {
+      setPinError('El PIN tiene de 4 a 8 números')
+      return
+    }
+    if (gate === 'newpin' && pin !== pinAgain) {
+      setPinError('Los dos PIN no son iguales')
+      return
+    }
+    setPinBusy(true)
+    setPinError(null)
+    try {
+      if (gate === 'newpin') await api.parentSetPin(pin)
+      else await api.parentLogin(pin)
+      sfx.correct()
+      if (changingPin) setToast('PIN cambiado')
+      setChangingPin(false)
+      setPin('')
+      setPinAgain('')
+      setGate('open')
+    } catch (error) {
+      sfx.wrong()
+      setPin('')
+      setPinAgain('')
+      setPinError(error instanceof ApiError ? error.message : 'No se pudo conectar con el servidor')
+    } finally {
+      setPinBusy(false)
+    }
+  }
+
+  const downloadBackup = async () => {
+    try {
+      await api.downloadBackup()
+    } catch (error) {
+      if (!expired(error)) setToast('No se pudo descargar la copia')
     }
   }
 
@@ -80,20 +159,23 @@ export function ParentsPage() {
       if (percent >= 100) {
         if (intervalRef.current) window.clearInterval(intervalRef.current)
         intervalRef.current = null
-        setGate('math')
         sfx.pop()
+        void afterHold()
       }
     }, 50)
   }
 
   const answerMath = (value: number) => {
-    if (value === 12) {
+    if (value === sum.answer) {
       sfx.correct()
-      setGate('open')
+      setGate('newpin')
     } else {
       sfx.wrong()
       setMathWrong(true)
-      window.setTimeout(() => setMathWrong(false), 600)
+      window.setTimeout(() => {
+        setMathWrong(false)
+        setSum(makeSum())
+      }, 600)
     }
   }
 
@@ -107,8 +189,9 @@ export function ParentsPage() {
       sfx.correct()
       setToast('Progreso reiniciado')
       setResetTarget(null)
-    } catch {
-      setToast('No se pudo reiniciar')
+    } catch (error) {
+      if (expired(error)) setResetTarget(null)
+      else setToast('No se pudo reiniciar')
     } finally {
       setResetting(false)
     }
@@ -156,9 +239,11 @@ export function ParentsPage() {
 
           {gate === 'math' && (
             <div className={cn('card w-full border-4 border-white p-5', mathWrong && 'animate-shake')}>
-              <p className="font-display text-xl">¿Cuánto es 7 + 5?</p>
+              <p className="font-display text-xl">
+                ¿Cuánto es {sum.a} + {sum.b}?
+              </p>
               <div className="mt-4 grid grid-cols-3 gap-2">
-                {[10, 12, 14].map((option) => (
+                {sum.options.map((option) => (
                   <button
                     key={option}
                     type="button"
@@ -172,9 +257,66 @@ export function ParentsPage() {
             </div>
           )}
 
-          <button type="button" onClick={() => navigate('/')} className="btn mt-2 h-12 text-sm font-bold text-ink/45">
-            Volver al inicio
+          {(gate === 'pin' || gate === 'newpin') && (
+            <form
+              className="card w-full border-4 border-white p-5"
+              onSubmit={(event) => {
+                event.preventDefault()
+                void submitPin()
+              }}
+            >
+              <p className="font-display text-xl">
+                {gate === 'pin' ? 'Escribe tu PIN' : changingPin ? 'Nuevo PIN' : 'Crea un PIN de padres'}
+              </p>
+              {gate === 'newpin' && (
+                <p className="mt-1 text-xs font-bold text-ink/50">
+                  De 4 a 8 números. Protege el progreso, las copias y las voces grabadas.
+                </p>
+              )}
+              <input
+                type="password"
+                inputMode="numeric"
+                autoComplete="off"
+                autoFocus
+                maxLength={8}
+                value={pin}
+                onChange={(event) => setPin(event.target.value.replace(/\D/g, ''))}
+                aria-label="PIN"
+                className="mt-4 h-16 w-full rounded-2xl border-4 border-ink/10 bg-white text-center font-display text-3xl tracking-[0.4em] outline-none focus:border-pika"
+              />
+              {gate === 'newpin' && (
+                <input
+                  type="password"
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={8}
+                  value={pinAgain}
+                  onChange={(event) => setPinAgain(event.target.value.replace(/\D/g, ''))}
+                  aria-label="Repite el PIN"
+                  placeholder="Repítelo"
+                  className="mt-2 h-16 w-full rounded-2xl border-4 border-ink/10 bg-white text-center font-display text-3xl tracking-[0.4em] outline-none placeholder:text-base placeholder:tracking-normal focus:border-pika"
+                />
+              )}
+              {pinError && <p className="mt-2 text-sm font-extrabold text-coral">{pinError}</p>}
+              <button type="submit" disabled={pinBusy} className="btn btn-primary mt-4 h-14 w-full text-base">
+                {pinBusy ? 'Un momento...' : gate === 'pin' ? 'Entrar' : 'Guardar PIN'}
+              </button>
+            </form>
+          )}
+
+          <button
+            type="button"
+            onClick={() => {
+              if (changingPin) {
+                setChangingPin(false)
+                setGate('open')
+              } else navigate('/')
+            }}
+            className="btn mt-2 h-12 text-sm font-bold text-ink/45"
+          >
+            {changingPin ? 'Cancelar' : 'Volver al inicio'}
           </button>
+          <Toast message={toast} />
         </div>
       </div>
     )
@@ -199,13 +341,13 @@ export function ParentsPage() {
           <span className="rounded bg-ink/5 px-1 font-mono text-xs">data/</span> del proyecto (volumen de
           Docker). Puedes descargar una copia cuando quieras.
         </p>
-        <a
-          href={api.backupUrl}
-          className="btn btn-mint mt-3 h-14 w-full text-base"
-          download
-        >
+        <button type="button" onClick={downloadBackup} className="btn btn-mint mt-3 h-14 w-full text-base">
           💾 Descargar copia de seguridad
-        </a>
+        </button>
+        <p className="mt-2 text-xs font-semibold text-ink/45">
+          Además se guarda una copia automática cada día en{' '}
+          <span className="rounded bg-ink/5 px-1 font-mono">data/backups/</span>.
+        </p>
       </div>
 
       <h2 className="mx-5 mt-5 font-display text-xl">Jugadores</h2>
@@ -317,6 +459,26 @@ export function ParentsPage() {
             </button>
           ))}
         </div>
+      </div>
+
+      <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">
+        <h2 className="font-display text-lg">🔒 PIN de padres</h2>
+        <p className="mt-1 text-sm font-semibold text-ink/60">
+          El PIN protege esta zona. La sesión se cierra sola al cerrar la app o después de 2 horas.
+        </p>
+        <button
+          type="button"
+          onClick={() => {
+            setChangingPin(true)
+            setPin('')
+            setPinAgain('')
+            setPinError(null)
+            setGate('newpin')
+          }}
+          className="btn btn-white mt-3 h-12 w-full text-sm"
+        >
+          Cambiar PIN
+        </button>
       </div>
 
       <div className="mx-4 mt-5 rounded-[2rem] bg-white/80 p-4">

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { parentHeaders } from '../lib/api'
 import { recordingList } from '../lib/session'
 import { audioKey, loadRecordedAudio, speak, stopSpeaking } from '../lib/speech'
 import { useStore } from '../lib/store'
@@ -86,7 +87,7 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
           const blob = new Blob(chunks, { type: recorder.mimeType || 'audio/webm' })
           const response = await fetch(`/api/audio/${encodeURIComponent(audioKey(text))}`, {
             method: 'PUT',
-            headers: { 'Content-Type': blob.type || 'audio/webm' },
+            headers: { 'Content-Type': blob.type || 'audio/webm', ...parentHeaders() },
             body: blob
           })
           if (!response.ok) throw new Error('save')
@@ -110,7 +111,11 @@ export function VoiceRecorder({ onClose }: { onClose: () => void }) {
 
   const remove = async () => {
     if (!selected) return
-    await fetch(`/api/audio/${encodeURIComponent(audioKey(selected))}`, { method: 'DELETE' })
+    const response = await fetch(`/api/audio/${encodeURIComponent(audioKey(selected))}`, {
+      method: 'DELETE',
+      headers: parentHeaders()
+    })
+    if (!response.ok) setError('No se pudo borrar. Vuelve a entrar a la zona de Padres.')
     await refresh()
   }
 

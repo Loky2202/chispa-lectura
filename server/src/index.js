@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,6 +14,8 @@ const CONTENT_PATH = process.env.CONTENT_PATH || path.join(ROOT, 'content/worlds
 const WEB_DIST = path.join(ROOT, 'web/dist')
 const PORT = Number(process.env.PORT || 3000)
 const TZ = process.env.TZ || 'America/Mexico_City'
+const BACKUP_DIR = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups')
+const BACKUP_KEEP = Math.max(1, Number(process.env.BACKUP_KEEP) || 14)
 
 const db = openDb(DB_PATH)
 
@@ -78,6 +81,125 @@ function getSummary(profileId) {
     energy: Math.min(10, 1 + Math.floor(xp / 40))
   }
 }
+
+// ---------- Envíos idempotentes ----------
+// La app manda un requestId por lección o repaso terminado. Si el mismo envío llega dos veces
+// (se perdió la respuesta, reintento de la cola offline), se devuelve lo ya guardado.
+db.prepare('DELETE FROM requests WHERE created_at < ?').run(
+  new Date(Date.now() - 60 * 86400000).toISOString()
+)
+
+const cleanRequestId = (raw) => {
+  const id = String(raw ?? '').trim()
+  return /^[\w-]{8,64}$/.test(id) ? id : ''
+}
+
+function replayRequest(requestId, profileId) {
+  if (!requestId) return null
+  const row = db.prepare('SELECT response FROM requests WHERE id = ?').get(requestId)
+  if (!row) return null
+  if (row.response) return { ...JSON.parse(row.response), duplicate: true }
+  const coins = getProfile(profileId)?.coins ?? 0
+  return { ok: true, duplicate: true, coinsEarned: 0, totalCoins: coins, newBadges: [], ...getSummary(profileId) }
+}
+
+function claimRequest(requestId, now) {
+  if (requestId) db.prepare('INSERT INTO requests (id, created_at) VALUES (?, ?)').run(requestId, now)
+}
+
+function storeResponse(requestId, response) {
+  if (requestId) db.prepare('UPDATE requests SET response = ? WHERE id = ?').run(JSON.stringify(response), requestId)
+  return response
+}
+
+// ---------- Respaldos ----------
+// VACUUM INTO escribe una copia completa y consistente aunque el servidor esté en uso.
+function snapshotTo(dest) {
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  fs.rmSync(dest, { force: true })
+  db.prepare('VACUUM INTO ?').run(dest)
+}
+
+const AUTO_BACKUP = /^auto-\d{4}-\d{2}-\d{2}\.db$/
+
+// Un respaldo por día en data/backups/auto-AAAA-MM-DD.db; se conservan los BACKUP_KEEP más recientes.
+// Los archivos con otro nombre (respaldos manuales) no se tocan.
+function autoBackup() {
+  try {
+    const hasData = db.prepare('SELECT 1 FROM profiles LIMIT 1').get()
+    if (!hasData) return
+    const dest = path.join(BACKUP_DIR, `auto-${todayStr()}.db`)
+    if (fs.existsSync(dest)) return
+    const partial = `${dest}.tmp`
+    snapshotTo(partial)
+    fs.renameSync(partial, dest)
+    const old = fs
+      .readdirSync(BACKUP_DIR)
+      .filter((name) => AUTO_BACKUP.test(name))
+      .sort()
+      .reverse()
+      .slice(BACKUP_KEEP)
+    for (const name of old) fs.rmSync(path.join(BACKUP_DIR, name), { force: true })
+    console.log(`Respaldo automático: ${dest}`)
+  } catch (error) {
+    console.error('No se pudo crear el respaldo automático:', error.message)
+  }
+}
+
+// ---------- Zona de Padres: PIN ----------
+// El PIN se guarda como hash (scrypt). Al entrar, el servidor entrega un token temporal
+// que la app manda en la cabecera x-parent-token.
+const PIN_KEY = 'parent_pin'
+const SESSION_MS = 2 * 60 * 60 * 1000
+const MAX_PIN_FAILS = 5
+const LOCK_MS = 60 * 1000
+const sessions = new Map()
+let pinFails = 0
+let lockedUntil = 0
+
+if (process.env.PARENT_PIN_RESET === '1') {
+  db.prepare('DELETE FROM config WHERE key = ?').run(PIN_KEY)
+  console.warn('PARENT_PIN_RESET=1: se borró el PIN de Padres. Quita la variable y crea uno nuevo.')
+}
+
+const validPin = (pin) => /^\d{4,8}$/.test(pin)
+const storedPin = () => db.prepare('SELECT value FROM config WHERE key = ?').get(PIN_KEY)?.value ?? null
+
+function hashPin(pin, salt = crypto.randomBytes(16).toString('hex')) {
+  return `${salt}:${crypto.scryptSync(pin, salt, 32).toString('hex')}`
+}
+
+function pinMatches(pin, stored) {
+  const [salt, hash] = stored.split(':')
+  const expected = Buffer.from(hash, 'hex')
+  const actual = crypto.scryptSync(pin, salt, 32)
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual)
+}
+
+function newSession() {
+  const now = Date.now()
+  for (const [token, expires] of sessions) if (expires < now) sessions.delete(token)
+  const token = crypto.randomBytes(24).toString('hex')
+  sessions.set(token, now + SESSION_MS)
+  return token
+}
+
+function hasSession(request) {
+  const token = String(request.headers['x-parent-token'] ?? '')
+  const expires = sessions.get(token)
+  return Boolean(expires && expires > Date.now())
+}
+
+async function requireParent(request, reply) {
+  if (!storedPin()) {
+    return reply.code(403).send({ error: 'Primero crea un PIN en la zona de Padres', code: 'pin-required' })
+  }
+  if (!hasSession(request)) {
+    return reply.code(401).send({ error: 'Entra a la zona de Padres con tu PIN', code: 'pin-login' })
+  }
+}
+
+const parentOnly = { preHandler: requireParent }
 
 const MISTAKE_KINDS = new Set(['letter', 'syllable', 'sight', 'word-hear', 'word-read', 'sentence', 'vowel'])
 
@@ -248,8 +370,11 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   const total = Math.max(0, Math.round(Number(body.total) || 0))
   const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
   const mistakes = cleanMistakes(body.mistakes)
+  const requestId = cleanRequestId(body.requestId)
 
   if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
+  const replayed = replayRequest(requestId, profileId)
+  if (replayed) return replayed
   const lesson = db.prepare('SELECT id FROM lessons WHERE id = ?').get(lessonId)
   if (!lesson) return reply.code(404).send({ error: 'Lección no encontrada' })
 
@@ -262,6 +387,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
 
   db.exec('BEGIN')
   try {
+    claimRequest(requestId, now)
     db.prepare(
       `INSERT INTO progress (profile_id, lesson_id, stars, best_correct, best_total, attempts, completed_at)
        VALUES (?, ?, ?, ?, ?, 1, ?)
@@ -296,13 +422,13 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   const newBadges = awardBadges(profileId, summary)
   const profile = getProfile(profileId)
 
-  return {
+  return storeResponse(requestId, {
     ok: true,
     coinsEarned,
     totalCoins: profile.coins,
     newBadges,
     ...getSummary(profileId)
-  }
+  })
 })
 
 // Repaso de hoy: marca como resuelto lo que respondió bien a la primera y guarda lo que volvió a fallar.
@@ -313,11 +439,15 @@ app.post('/api/review/complete', async (request, reply) => {
   const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
   const mistakes = cleanMistakes(body.mistakes)
   const solved = cleanMistakes(body.solved)
+  const requestId = cleanRequestId(body.requestId)
+  const replayed = replayRequest(requestId, profileId)
+  if (replayed) return replayed
   const coinsEarned = 5
   const now = new Date().toISOString()
 
   db.exec('BEGIN')
   try {
+    claimRequest(requestId, now)
     const resolve = db.prepare(
       'UPDATE mistakes SET resolved = 1 WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
     )
@@ -337,7 +467,13 @@ app.post('/api/review/complete', async (request, reply) => {
     return reply.code(500).send({ error: 'No se pudo guardar el repaso' })
   }
 
-  return { ok: true, coinsEarned, totalCoins: getProfile(profileId).coins, newBadges: [], ...getSummary(profileId) }
+  return storeResponse(requestId, {
+    ok: true,
+    coinsEarned,
+    totalCoins: getProfile(profileId).coins,
+    newBadges: [],
+    ...getSummary(profileId)
+  })
 })
 
 // ---------- Voces grabadas ----------
@@ -359,7 +495,7 @@ app.get('/api/audio/:key', async (request, reply) => {
   return reply.send(Buffer.from(row.data))
 })
 
-app.put('/api/audio/:key', async (request, reply) => {
+app.put('/api/audio/:key', parentOnly, async (request, reply) => {
   const key = audioKey(request.params.key)
   const body = request.body
   if (!key || !Buffer.isBuffer(body) || body.length < 200) {
@@ -374,7 +510,7 @@ app.put('/api/audio/:key', async (request, reply) => {
   return { ok: true, key, updatedAt }
 })
 
-app.delete('/api/audio/:key', async (request) => {
+app.delete('/api/audio/:key', parentOnly, async (request) => {
   db.prepare('DELETE FROM audio WHERE key = ?').run(audioKey(request.params.key))
   return { ok: true }
 })
@@ -411,7 +547,44 @@ app.post('/api/rewards/unlock', async (request, reply) => {
   return { ok: true, coins: getProfile(profileId).coins, item }
 })
 
-app.get('/api/parents/summary', async () => {
+app.get('/api/parents/status', async (request) => ({
+  hasPin: Boolean(storedPin()),
+  authed: Boolean(storedPin()) && hasSession(request)
+}))
+
+// Crea el PIN (si no hay) o lo cambia (con sesión abierta).
+app.post('/api/parents/pin', async (request, reply) => {
+  const pin = String(request.body?.pin ?? '')
+  if (!validPin(pin)) return reply.code(400).send({ error: 'El PIN debe tener de 4 a 8 números' })
+  if (storedPin() && !hasSession(request)) {
+    return reply.code(401).send({ error: 'Entra a la zona de Padres con tu PIN', code: 'pin-login' })
+  }
+  db.prepare(
+    'INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+  ).run(PIN_KEY, hashPin(pin))
+  sessions.clear()
+  return { ok: true, token: newSession() }
+})
+
+app.post('/api/parents/login', async (request, reply) => {
+  const stored = storedPin()
+  if (!stored) return reply.code(403).send({ error: 'Primero crea un PIN', code: 'pin-required' })
+  const wait = Math.ceil((lockedUntil - Date.now()) / 1000)
+  if (wait > 0) return reply.code(429).send({ error: `Demasiados intentos. Espera ${wait} segundos.` })
+  const pin = String(request.body?.pin ?? '')
+  if (!validPin(pin) || !pinMatches(pin, stored)) {
+    pinFails += 1
+    if (pinFails >= MAX_PIN_FAILS) {
+      pinFails = 0
+      lockedUntil = Date.now() + LOCK_MS
+    }
+    return reply.code(401).send({ error: 'PIN incorrecto', code: 'pin-wrong' })
+  }
+  pinFails = 0
+  return { ok: true, token: newSession() }
+})
+
+app.get('/api/parents/summary', parentOnly, async () => {
   const profiles = db.prepare('SELECT id, name, avatar, coins, created_at FROM profiles ORDER BY id').all()
   return profiles.map((profile) => {
     const summary = getSummary(profile.id)
@@ -422,7 +595,7 @@ app.get('/api/parents/summary', async () => {
   })
 })
 
-app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
+app.delete('/api/profiles/:profileId/progress', parentOnly, async (request, reply) => {
   const profileId = Number(request.params.profileId)
   if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
   db.exec('BEGIN')
@@ -442,11 +615,18 @@ app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
   return { ok: true }
 })
 
-app.get('/api/backup', async (request, reply) => {
-  db.exec('PRAGMA wal_checkpoint(FULL);')
+app.get('/api/backup', parentOnly, async (request, reply) => {
+  const temp = path.join(BACKUP_DIR, `.descarga-${crypto.randomBytes(6).toString('hex')}.db`)
+  let data
+  try {
+    snapshotTo(temp)
+    data = fs.readFileSync(temp)
+  } finally {
+    fs.rmSync(temp, { force: true })
+  }
   reply.header('Content-Disposition', `attachment; filename="chispa-${todayStr()}.db"`)
   reply.type('application/octet-stream')
-  return reply.send(fs.createReadStream(DB_PATH))
+  return reply.send(data)
 })
 
 if (fs.existsSync(WEB_DIST)) {
@@ -480,6 +660,9 @@ async function start() {
 }
 
 start()
+
+autoBackup()
+setInterval(autoBackup, 60 * 60 * 1000).unref()
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, async () => {

@@ -96,6 +96,19 @@ CREATE TABLE IF NOT EXISTS audio (
   updated_at TEXT NOT NULL
 );
 
+-- Envíos ya procesados (lecciones y repasos): si la app reintenta el mismo envío, no se paga dos veces.
+CREATE TABLE IF NOT EXISTS requests (
+  id TEXT PRIMARY KEY,
+  response TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+-- Ajustes del servidor (por ejemplo, el PIN de la zona de Padres, guardado como hash).
+CREATE TABLE IF NOT EXISTS config (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
 CREATE INDEX IF NOT EXISTS idx_mistakes_profile ON mistakes(profile_id, resolved);
 CREATE INDEX IF NOT EXISTS idx_progress_profile ON progress(profile_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_profile ON attempts(profile_id);

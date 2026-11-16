@@ -39,7 +39,7 @@ docker compose down
 2. Empieza en el **Bosque de los Sonidos** (Mundo 0).
 3. Cada lección tiene 3-5 minijuegos. Al terminar ganas estrellas y monedas.
 4. Con las monedas desbloqueas coches y stickers en el **Garaje**.
-5. La zona **⚙️ Padres** está protegida con pulsación de 3 segundos y una pregunta.
+5. La zona **⚙️ Padres** está protegida con pulsación de 3 segundos y un **PIN** que creas la primera vez. Si lo olvidas, agrega `PARENT_PIN_RESET=1` al `environment` de `docker-compose.yml`, reinicia, crea uno nuevo y quita la variable.
 
 Estrellas por lección:
 
@@ -61,7 +61,8 @@ La base de datos vive en:
 
 Ese archivo está montado como volumen de Docker, así que **sobrevive** a reinicios y a `docker compose down`.
 
-- Descargar copia: zona de padres → **“Descargar copia de seguridad”** (o `http://localhost:3100/api/backup`).
+- Copia automática: el servidor guarda una por día en `data/backups/auto-AAAA-MM-DD.db` y conserva las últimas 14.
+- Descargar copia: zona de padres → **“Descargar copia de seguridad”**.
 - Restaurar: detén el contenedor, reemplaza `data/lectura.db` por tu copia y vuelve a arrancar.
 - Reiniciar el progreso de un jugador: zona de padres → **Reiniciar progreso**.
 

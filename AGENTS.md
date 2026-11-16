@@ -110,8 +110,9 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
   sugerido (`chispa.dailyMinutes`, 15 por defecto) solo invita a descansar, no bloquea.
 - Voces grabadas: tabla `audio` (clave = texto normalizado) y `/api/audio`. `speak()`
   usa la grabación si existe y si no la voz del navegador. Grabar exige HTTPS o localhost.
-- Offline: claves `chispa.*` en localStorage; las lecciones se encolan en
-  `chispa.queue` y se envían al volver `online`.
+- Offline: claves `chispa.*` en localStorage; lecciones y repasos se encolan en
+  `chispa.queue` y se envían al volver `online`. Cada envío lleva un `requestId` y el
+  servidor (tabla `requests`) no lo guarda dos veces; un rechazo 4xx se descarta de la cola.
 - TTS prefiere es-MX/es-419; el reconocimiento usa `webkitSpeechRecognition` con
   `es-MX`. Micrófono y PWA exigen HTTPS o localhost; por HTTP en LAN, `read_aloud`
   cae al botón “Ya leí”.
@@ -121,8 +122,14 @@ No hay CI: corre estas comprobaciones a mano antes de dar algo por terminado.
 
 - `data/lectura.db` contiene el progreso real del niño y está en `.gitignore`.
   Nunca lo borres, lo reinicies ni uses `docker compose down -v` para “arreglar” algo.
-- Respaldo: `/api/backup` (hace checkpoint del WAL) o la zona de Padres. No copies el
-  `.db` mientras el servidor corre.
+- Respaldo: el servidor guarda solo una copia diaria en `data/backups/auto-AAAA-MM-DD.db`
+  (`VACUUM INTO`, conserva las últimas `BACKUP_KEEP`, 14 por defecto) y no toca archivos
+  con otro nombre. La zona de Padres descarga una copia al momento (`/api/backup`, pide
+  sesión de Padres). No copies el `.db` mientras el servidor corre.
+- Zona de Padres: PIN guardado como hash en la tabla `config`; `/api/parents/login`
+  entrega un token en memoria (2 h) que viaja en `x-parent-token`. Lo exigen
+  `/api/parents/summary`, `/api/backup`, reiniciar progreso y grabar/borrar voces. PIN
+  olvidado: arranca una vez con `PARENT_PIN_RESET=1`.
 - El repo es público: no metas datos reales del niño en `content/` ni en commits.
 
 ## Estilo
