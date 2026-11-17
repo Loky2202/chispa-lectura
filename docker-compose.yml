@@ -2,8 +2,10 @@ services:
   chispa:
     build: .
     container_name: chispa-lectura
+    # Por defecto escucha en toda la red, puerto 3100. En un servidor con HTTPS delante
+    # (docs/SERVIDOR.md) pon CHISPA_BIND=127.0.0.1 en un archivo .env junto a este.
     ports:
-      - "3100:3000"
+      - "${CHISPA_BIND:-0.0.0.0}:${CHISPA_PORT:-3100}:3000"
     volumes:
       - ./data:/data
       - ./content:/app/content:ro

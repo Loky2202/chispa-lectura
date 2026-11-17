@@ -75,10 +75,54 @@ CREATE TABLE IF NOT EXISTS daily (
   PRIMARY KEY (profile_id, day)
 );
 
+-- Lo que el niño falló: sirve para el "Repaso de hoy" y para la zona de Padres.
+-- Repaso espaciado: cada acierto a la primera en un repaso sube stage y aleja due_at
+-- (día en que vuelve a tocar); resolved = 1 cuando completa todos los intervalos.
+-- Las columnas stage y due_at se agregan en openDb (migración).
+CREATE TABLE IF NOT EXISTS mistakes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_id INTEGER NOT NULL,
+  lesson_id TEXT NOT NULL,
+  kind TEXT NOT NULL,
+  item TEXT NOT NULL,
+  chosen TEXT NOT NULL DEFAULT '',
+  resolved INTEGER NOT NULL DEFAULT 0,
+  created_at TEXT NOT NULL
+);
+
+-- Voces grabadas por la familia (sílabas, palabras). La clave es el texto normalizado.
+CREATE TABLE IF NOT EXISTS audio (
+  key TEXT PRIMARY KEY,
+  mime TEXT NOT NULL,
+  data BLOB NOT NULL,
+  updated_at TEXT NOT NULL
+);
+
+-- Envíos ya procesados (lecciones y repasos): si la app reintenta el mismo envío, no se paga dos veces.
+CREATE TABLE IF NOT EXISTS requests (
+  id TEXT PRIMARY KEY,
+  response TEXT NOT NULL DEFAULT '',
+  created_at TEXT NOT NULL
+);
+
+-- Ajustes del servidor (por ejemplo, el PIN de la zona de Padres, guardado como hash).
+CREATE TABLE IF NOT EXISTS config (
+  key TEXT PRIMARY KEY,
+  value TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_mistakes_profile ON mistakes(profile_id, resolved);
 CREATE INDEX IF NOT EXISTS idx_progress_profile ON progress(profile_id);
 CREATE INDEX IF NOT EXISTS idx_attempts_profile ON attempts(profile_id);
 CREATE INDEX IF NOT EXISTS idx_daily_profile ON daily(profile_id);
 `
+
+// Columnas agregadas después de la primera versión: solo se añaden, nunca se borra nada.
+function migrate(db) {
+  const columns = db.prepare('PRAGMA table_info(mistakes)').all().map((column) => column.name)
+  if (!columns.includes('stage')) db.exec('ALTER TABLE mistakes ADD COLUMN stage INTEGER NOT NULL DEFAULT 0')
+  if (!columns.includes('due_at')) db.exec('ALTER TABLE mistakes ADD COLUMN due_at TEXT')
+}
 
 export function openDb(dbPath) {
   fs.mkdirSync(path.dirname(dbPath), { recursive: true })
@@ -87,6 +131,7 @@ export function openDb(dbPath) {
   db.exec('PRAGMA synchronous = NORMAL;')
   db.exec('PRAGMA busy_timeout = 5000;')
   db.exec(SCHEMA)
+  migrate(db)
   return db
 }
 

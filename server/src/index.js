@@ -1,5 +1,6 @@
 import Fastify from 'fastify'
 import fastifyStatic from '@fastify/static'
+import crypto from 'node:crypto'
 import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -13,6 +14,8 @@ const CONTENT_PATH = process.env.CONTENT_PATH || path.join(ROOT, 'content/worlds
 const WEB_DIST = path.join(ROOT, 'web/dist')
 const PORT = Number(process.env.PORT || 3000)
 const TZ = process.env.TZ || 'America/Mexico_City'
+const BACKUP_DIR = process.env.BACKUP_DIR || path.join(path.dirname(DB_PATH), 'backups')
+const BACKUP_KEEP = Math.max(1, Number(process.env.BACKUP_KEEP) || 14)
 
 const db = openDb(DB_PATH)
 
@@ -79,8 +82,313 @@ function getSummary(profileId) {
   }
 }
 
+// ---------- Envíos idempotentes ----------
+// La app manda un requestId por lección o repaso terminado. Si el mismo envío llega dos veces
+// (se perdió la respuesta, reintento de la cola offline), se devuelve lo ya guardado.
+db.prepare('DELETE FROM requests WHERE created_at < ?').run(
+  new Date(Date.now() - 60 * 86400000).toISOString()
+)
+
+const cleanRequestId = (raw) => {
+  const id = String(raw ?? '').trim()
+  return /^[\w-]{8,64}$/.test(id) ? id : ''
+}
+
+function replayRequest(requestId, profileId) {
+  if (!requestId) return null
+  const row = db.prepare('SELECT response FROM requests WHERE id = ?').get(requestId)
+  if (!row) return null
+  if (row.response) return { ...JSON.parse(row.response), duplicate: true }
+  const coins = getProfile(profileId)?.coins ?? 0
+  return { ok: true, duplicate: true, coinsEarned: 0, totalCoins: coins, newBadges: [], ...getSummary(profileId) }
+}
+
+function claimRequest(requestId, now) {
+  if (requestId) db.prepare('INSERT INTO requests (id, created_at) VALUES (?, ?)').run(requestId, now)
+}
+
+function storeResponse(requestId, response) {
+  if (requestId) db.prepare('UPDATE requests SET response = ? WHERE id = ?').run(JSON.stringify(response), requestId)
+  return response
+}
+
+// ---------- Respaldos ----------
+// VACUUM INTO escribe una copia completa y consistente aunque el servidor esté en uso.
+function snapshotTo(dest) {
+  fs.mkdirSync(path.dirname(dest), { recursive: true })
+  fs.rmSync(dest, { force: true })
+  db.prepare('VACUUM INTO ?').run(dest)
+}
+
+const AUTO_BACKUP = /^auto-\d{4}-\d{2}-\d{2}\.db$/
+
+// Un respaldo por día en data/backups/auto-AAAA-MM-DD.db; se conservan los BACKUP_KEEP más recientes.
+// Los archivos con otro nombre (respaldos manuales) no se tocan.
+function autoBackup() {
+  try {
+    const hasData = db.prepare('SELECT 1 FROM profiles LIMIT 1').get()
+    if (!hasData) return
+    const dest = path.join(BACKUP_DIR, `auto-${todayStr()}.db`)
+    if (fs.existsSync(dest)) return
+    const partial = `${dest}.tmp`
+    snapshotTo(partial)
+    fs.renameSync(partial, dest)
+    const old = fs
+      .readdirSync(BACKUP_DIR)
+      .filter((name) => AUTO_BACKUP.test(name))
+      .sort()
+      .reverse()
+      .slice(BACKUP_KEEP)
+    for (const name of old) fs.rmSync(path.join(BACKUP_DIR, name), { force: true })
+    console.log(`Respaldo automático: ${dest}`)
+  } catch (error) {
+    console.error('No se pudo crear el respaldo automático:', error.message)
+  }
+}
+
+// ---------- Zona de Padres: PIN ----------
+// El PIN se guarda como hash (scrypt). Al entrar, el servidor entrega un token temporal
+// que la app manda en la cabecera x-parent-token.
+const PIN_KEY = 'parent_pin'
+const SESSION_MS = 2 * 60 * 60 * 1000
+const MAX_PIN_FAILS = 5
+const LOCK_MS = 60 * 1000
+const sessions = new Map()
+let pinFails = 0
+let lockedUntil = 0
+
+if (process.env.PARENT_PIN_RESET === '1') {
+  db.prepare('DELETE FROM config WHERE key = ?').run(PIN_KEY)
+  console.warn('PARENT_PIN_RESET=1: se borró el PIN de Padres. Quita la variable y crea uno nuevo.')
+}
+
+const validPin = (pin) => /^\d{4,8}$/.test(pin)
+const storedPin = () => db.prepare('SELECT value FROM config WHERE key = ?').get(PIN_KEY)?.value ?? null
+
+function hashPin(pin, salt = crypto.randomBytes(16).toString('hex')) {
+  return `${salt}:${crypto.scryptSync(pin, salt, 32).toString('hex')}`
+}
+
+function pinMatches(pin, stored) {
+  const [salt, hash] = stored.split(':')
+  const expected = Buffer.from(hash, 'hex')
+  const actual = crypto.scryptSync(pin, salt, 32)
+  return expected.length === actual.length && crypto.timingSafeEqual(expected, actual)
+}
+
+function newSession() {
+  const now = Date.now()
+  for (const [token, expires] of sessions) if (expires < now) sessions.delete(token)
+  const token = crypto.randomBytes(24).toString('hex')
+  sessions.set(token, now + SESSION_MS)
+  return token
+}
+
+function hasSession(request) {
+  const token = String(request.headers['x-parent-token'] ?? '')
+  const expires = sessions.get(token)
+  return Boolean(expires && expires > Date.now())
+}
+
+async function requireParent(request, reply) {
+  if (!storedPin()) {
+    return reply.code(403).send({ error: 'Primero crea un PIN en la zona de Padres', code: 'pin-required' })
+  }
+  if (!hasSession(request)) {
+    return reply.code(401).send({ error: 'Entra a la zona de Padres con tu PIN', code: 'pin-login' })
+  }
+}
+
+const parentOnly = { preHandler: requireParent }
+
+const MISTAKE_KINDS = new Set(['letter', 'syllable', 'sight', 'word-hear', 'word-read', 'sentence', 'vowel'])
+
+function cleanMistakes(list) {
+  if (!Array.isArray(list)) return []
+  return list
+    .slice(0, 40)
+    .map((m) => ({
+      kind: String(m?.kind ?? ''),
+      item: String(m?.item ?? '').slice(0, 120),
+      chosen: String(m?.chosen ?? '').slice(0, 120)
+    }))
+    .filter((m) => MISTAKE_KINDS.has(m.kind) && m.item)
+}
+
+// Repaso espaciado: tras cada acierto a la primera en un repaso, el elemento vuelve en
+// 1, 3 y 7 días; al acertar también el último, queda resuelto. Si lo vuelve a fallar
+// (en una lección o en un repaso), empieza de nuevo y toca hoy.
+const REVIEW_INTERVALS = [1, 3, 7]
+
+function saveMistakes(profileId, lessonId, list, now) {
+  const insert = db.prepare(
+    'INSERT INTO mistakes (profile_id, lesson_id, kind, item, chosen, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+  )
+  const restart = db.prepare(
+    'UPDATE mistakes SET stage = 0, due_at = NULL WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  for (const m of list) {
+    insert.run(profileId, lessonId, m.kind, m.item, m.chosen, now)
+    restart.run(profileId, m.kind, m.item)
+  }
+}
+
+function advanceReview(profileId, solved) {
+  const today = todayStr()
+  const current = db.prepare(
+    `SELECT MAX(stage) AS stage FROM mistakes
+     WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0 AND (due_at IS NULL OR due_at <= ?)`
+  )
+  const schedule = db.prepare(
+    'UPDATE mistakes SET stage = ?, due_at = ? WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  const resolve = db.prepare(
+    'UPDATE mistakes SET resolved = 1 WHERE profile_id = ? AND kind = ? AND item = ? AND resolved = 0'
+  )
+  for (const m of solved) {
+    const row = current.get(profileId, m.kind, m.item, today)
+    if (row?.stage == null) continue
+    const stage = row.stage + 1
+    if (stage > REVIEW_INTERVALS.length) resolve.run(profileId, m.kind, m.item)
+    else schedule.run(stage, shiftDay(today, REVIEW_INTERVALS[stage - 1]), profileId, m.kind, m.item)
+  }
+}
+
+// Lo que toca repasar hoy (sin resolver y ya vencido), lo más repetido primero.
+function getTrouble(profileId, limit = 12) {
+  return db
+    .prepare(
+      `SELECT kind, item, COUNT(*) AS count, MAX(created_at) AS last FROM mistakes
+       WHERE profile_id = ? AND resolved = 0 AND (due_at IS NULL OR due_at <= ?)
+       GROUP BY kind, item ORDER BY count DESC, last DESC LIMIT ?`
+    )
+    .all(profileId, todayStr(), limit)
+}
+
+// Para Padres: qué confundió con qué en los últimos 30 días.
+function getConfusions(profileId, limit = 10) {
+  const since = new Date(Date.now() - 30 * 86400000).toISOString()
+  return db
+    .prepare(
+      `SELECT kind, item, chosen, COUNT(*) AS count, MIN(resolved) = 1 AS resolved,
+              COALESCE(MAX(CASE WHEN resolved = 0 THEN stage END), 0) AS stage FROM mistakes
+       WHERE profile_id = ? AND created_at >= ?
+       GROUP BY kind, item, chosen ORDER BY count DESC, MAX(created_at) DESC LIMIT ?`
+    )
+    .all(profileId, since, limit)
+    .map((row) => ({ ...row, resolved: Boolean(row.resolved) }))
+}
+
 function getProfile(profileId) {
   return db.prepare('SELECT * FROM profiles WHERE id = ?').get(profileId)
+}
+
+// Medallas fijas (rewards.js) más una por cada mundo completado (mundo-<id>).
+const WORLD_BADGE = 'mundo-'
+
+function badgeInfo(code) {
+  if (BADGES[code]) return BADGES[code]
+  if (code.startsWith(WORLD_BADGE)) {
+    const world = db.prepare('SELECT title, emoji FROM worlds WHERE id = ?').get(code.slice(WORLD_BADGE.length))
+    if (world) return { name: world.title, emoji: world.emoji }
+  }
+  return { name: 'Medalla', emoji: '🏅' }
+}
+
+function badgeCatalog() {
+  const fixed = Object.entries(BADGES).map(([code, badge]) => ({ code, ...badge }))
+  const worlds = db
+    .prepare('SELECT id, title, emoji FROM worlds ORDER BY sort')
+    .all()
+    .map((world) => ({ code: WORLD_BADGE + world.id, name: world.title, emoji: world.emoji }))
+  return [...fixed, ...worlds]
+}
+
+function completedWorlds(profileId) {
+  return db
+    .prepare(
+      `SELECT w.id FROM worlds w
+       WHERE (SELECT COUNT(*) FROM lessons l WHERE l.world_id = w.id) > 0
+         AND (SELECT COUNT(*) FROM lessons l WHERE l.world_id = w.id) =
+             (SELECT COUNT(*) FROM progress p JOIN lessons l ON l.id = p.lesson_id
+              WHERE p.profile_id = ? AND l.world_id = w.id AND p.stars > 0)`
+    )
+    .all(profileId)
+    .map((row) => row.id)
+}
+
+// ---------- Reporte para Padres ----------
+// Últimos 7 días: segundos por día, lecciones jugadas y errores.
+function getWeek(profileId) {
+  const today = todayStr()
+  const seconds = new Map(
+    db
+      .prepare('SELECT day, seconds FROM daily WHERE profile_id = ? AND day >= ?')
+      .all(profileId, shiftDay(today, -6))
+      .map((row) => [row.day, row.seconds])
+  )
+  const days = []
+  for (let back = 6; back >= 0; back -= 1) {
+    const day = shiftDay(today, -back)
+    days.push({ day, seconds: seconds.get(day) ?? 0 })
+  }
+  const since = new Date(Date.now() - 7 * 86400000).toISOString()
+  const count = (table) =>
+    db.prepare(`SELECT COUNT(*) AS c FROM ${table} WHERE profile_id = ? AND created_at >= ?`).get(profileId, since).c
+  return { days, lessonsPlayed: count('attempts'), mistakes: count('mistakes') }
+}
+
+const VOWELS = 'aeiouáéíóúü'
+const DIGRAPHS = ['ch', 'll', 'rr', 'qu']
+
+// Letra a la que pertenece una sílaba: su primera consonante (o dígrafo); si no tiene, la vocal.
+function letterKey(text) {
+  const s = String(text).toLowerCase()
+  for (let i = 0; i < s.length; i += 1) {
+    if (DIGRAPHS.includes(s.slice(i, i + 2))) return s.slice(i, i + 2)
+    if (/\p{L}/u.test(s[i]) && !VOWELS.includes(s[i])) return s[i]
+  }
+  const first = s.normalize('NFD')[0] ?? ''
+  return /[a-z]/.test(first) ? first : ''
+}
+
+// Mapa de letras: cuántas sílabas de cada letra ya practicó (lecciones completadas)
+// y cuántos errores de letra o sílaba siguen sin resolver.
+function getLetters(profileId) {
+  const practiced = new Map()
+  const note = (text) => {
+    if (typeof text !== 'string' || !text || text.length > 4 || /\s/.test(text)) return
+    const key = letterKey(text)
+    if (!key) return
+    if (!practiced.has(key)) practiced.set(key, new Set())
+    practiced.get(key).add(text.toLowerCase())
+  }
+  const lessons = db
+    .prepare('SELECT l.activities FROM progress p JOIN lessons l ON l.id = p.lesson_id WHERE p.profile_id = ?')
+    .all(profileId)
+  for (const lesson of lessons) {
+    for (const activity of JSON.parse(lesson.activities)) {
+      if (activity.type === 'learn') {
+        note(activity.letter)
+        activity.syllables?.forEach(note)
+      } else if (activity.type === 'listen_tap') note(activity.answer)
+      else if (activity.type === 'blend') activity.parts?.forEach(note)
+    }
+  }
+  const errors = new Map()
+  const rows = db
+    .prepare(
+      `SELECT item, COUNT(*) AS c FROM mistakes
+       WHERE profile_id = ? AND resolved = 0 AND kind IN ('letter', 'syllable') GROUP BY item`
+    )
+    .all(profileId)
+  for (const row of rows) {
+    const key = letterKey(row.item)
+    if (key) errors.set(key, (errors.get(key) ?? 0) + row.c)
+  }
+  return [...new Set([...practiced.keys(), ...errors.keys()])]
+    .sort((a, b) => a.localeCompare(b, 'es'))
+    .map((letter) => ({ letter, practiced: practiced.get(letter)?.size ?? 0, errors: errors.get(letter) ?? 0 }))
 }
 
 function awardBadges(profileId, summary) {
@@ -99,13 +407,29 @@ function awardBadges(profileId, summary) {
   add('cinco-lecciones', summary.lessonsCompleted >= 5)
   add('diez-lecciones', summary.lessonsCompleted >= 10)
   add('veinte-lecciones', summary.lessonsCompleted >= 20)
+  add('treinta-lecciones', summary.lessonsCompleted >= 30)
+  add('cincuenta-lecciones', summary.lessonsCompleted >= 50)
+  const totalLessons = db.prepare('SELECT COUNT(*) AS c FROM lessons').get().c
+  add('todas-lecciones', totalLessons > 0 && summary.lessonsCompleted >= totalLessons)
   add('monedas-100', (getProfile(profileId)?.coins ?? 0) >= 100)
 
   const perfect = db
     .prepare('SELECT COUNT(*) AS c FROM progress WHERE profile_id = ? AND stars = 3')
     .get(profileId)
   add('perfecto', perfect.c >= 1)
+  add('diez-perfectas', perfect.c >= 10)
   add('tres-dias', summary.streak >= 3)
+  add('siete-dias', summary.streak >= 7)
+  add('catorce-dias', summary.streak >= 14)
+
+  const fixed = db
+    .prepare(
+      'SELECT COUNT(*) AS c FROM (SELECT DISTINCT kind, item FROM mistakes WHERE profile_id = ? AND resolved = 1)'
+    )
+    .get(profileId)
+  add('repaso-5', fixed.c >= 5)
+  add('repaso-15', fixed.c >= 15)
+  for (const worldId of completedWorlds(profileId)) add(WORLD_BADGE + worldId, true)
 
   const worlds = db.prepare('SELECT id FROM worlds').all()
   const worldComplete = worlds.some((world) => {
@@ -128,7 +452,7 @@ function awardBadges(profileId, summary) {
   )
   const now = new Date().toISOString()
   candidates.forEach((code) => insert.run(profileId, code, now))
-  return candidates.map((code) => ({ code, ...BADGES[code] }))
+  return candidates.map((code) => ({ code, ...badgeInfo(code) }))
 }
 
 const app = Fastify({ logger: true, trustProxy: true })
@@ -177,7 +501,7 @@ app.get('/api/progress/:profileId', async (request, reply) => {
   const badges = db
     .prepare('SELECT code, earned_at FROM badges WHERE profile_id = ?')
     .all(profileId)
-    .map((row) => ({ code: row.code, earnedAt: row.earned_at, ...BADGES[row.code] }))
+    .map((row) => ({ code: row.code, earnedAt: row.earned_at, ...badgeInfo(row.code) }))
 
   const unlocks = db
     .prepare('SELECT item_id, unlocked_at FROM unlocks WHERE profile_id = ?')
@@ -189,6 +513,8 @@ app.get('/api/progress/:profileId', async (request, reply) => {
     progress,
     badges,
     unlocks,
+    badgeCatalog: badgeCatalog(),
+    trouble: getTrouble(profileId),
     ...getSummary(profileId)
   }
 })
@@ -201,8 +527,12 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   const correct = Math.max(0, Math.round(Number(body.correct) || 0))
   const total = Math.max(0, Math.round(Number(body.total) || 0))
   const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
+  const mistakes = cleanMistakes(body.mistakes)
+  const requestId = cleanRequestId(body.requestId)
 
   if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
+  const replayed = replayRequest(requestId, profileId)
+  if (replayed) return replayed
   const lesson = db.prepare('SELECT id FROM lessons WHERE id = ?').get(lessonId)
   if (!lesson) return reply.code(404).send({ error: 'Lección no encontrada' })
 
@@ -215,6 +545,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
 
   db.exec('BEGIN')
   try {
+    claimRequest(requestId, now)
     db.prepare(
       `INSERT INTO progress (profile_id, lesson_id, stars, best_correct, best_total, attempts, completed_at)
        VALUES (?, ?, ?, ?, ?, 1, ?)
@@ -236,6 +567,7 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
     db.prepare(
       'INSERT INTO attempts (profile_id, lesson_id, stars, correct, total, seconds, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
     ).run(profileId, lessonId, stars, correct, total, seconds, now)
+    saveMistakes(profileId, lessonId, mistakes, now)
 
     db.exec('COMMIT')
   } catch (error) {
@@ -248,13 +580,128 @@ app.post('/api/lessons/:lessonId/complete', async (request, reply) => {
   const newBadges = awardBadges(profileId, summary)
   const profile = getProfile(profileId)
 
-  return {
+  return storeResponse(requestId, {
     ok: true,
     coinsEarned,
     totalCoins: profile.coins,
     newBadges,
     ...getSummary(profileId)
+  })
+})
+
+// Repaso de hoy: lo que respondió bien a la primera avanza en el repaso espaciado; lo que volvió a fallar se guarda.
+app.post('/api/review/complete', async (request, reply) => {
+  const body = request.body ?? {}
+  const profileId = Number(body.profileId)
+  if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
+  const seconds = Math.max(0, Math.min(3600, Math.round(Number(body.seconds) || 0)))
+  const mistakes = cleanMistakes(body.mistakes)
+  const solved = cleanMistakes(body.solved)
+  const requestId = cleanRequestId(body.requestId)
+  const replayed = replayRequest(requestId, profileId)
+  if (replayed) return replayed
+  const coinsEarned = 5
+  const now = new Date().toISOString()
+
+  db.exec('BEGIN')
+  try {
+    claimRequest(requestId, now)
+    advanceReview(profileId, solved)
+    saveMistakes(profileId, 'repaso', mistakes, now)
+    db.prepare('UPDATE profiles SET coins = coins + ? WHERE id = ?').run(coinsEarned, profileId)
+    db.prepare(
+      `INSERT INTO daily (profile_id, day, seconds, coins) VALUES (?, ?, ?, ?)
+       ON CONFLICT(profile_id, day) DO UPDATE SET
+         seconds = daily.seconds + excluded.seconds,
+         coins = daily.coins + excluded.coins`
+    ).run(profileId, todayStr(), seconds, coinsEarned)
+    db.exec('COMMIT')
+  } catch (error) {
+    db.exec('ROLLBACK')
+    request.log.error(error)
+    return reply.code(500).send({ error: 'No se pudo guardar el repaso' })
   }
+
+  return storeResponse(requestId, {
+    ok: true,
+    coinsEarned,
+    totalCoins: getProfile(profileId).coins,
+    newBadges: awardBadges(profileId, getSummary(profileId)),
+    ...getSummary(profileId)
+  })
+})
+
+// ---------- Ajustes compartidos entre dispositivos ----------
+const getConfig = (key) => db.prepare('SELECT value FROM config WHERE key = ?').get(key)?.value ?? null
+const setConfig = (key, value) =>
+  db
+    .prepare('INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value')
+    .run(key, String(value))
+
+function readSettings() {
+  const daily = getConfig('daily_minutes')
+  return { dailyMinutes: daily === null ? null : Number(daily) }
+}
+
+app.get('/api/settings', async () => readSettings())
+
+app.put('/api/settings', parentOnly, async (request, reply) => {
+  const minutes = Number(request.body?.dailyMinutes)
+  if (!Number.isInteger(minutes) || minutes < 0 || minutes > 180) {
+    return reply.code(400).send({ error: 'Tiempo diario no válido' })
+  }
+  setConfig('daily_minutes', minutes)
+  return readSettings()
+})
+
+// ---------- Voces grabadas ----------
+// Lista de textos que la app dice en voz alta, con su identificador estable (para importar archivos).
+const AUDIO_MANIFEST = path.join(path.dirname(CONTENT_PATH), 'audio/manifest.json')
+
+app.get('/api/audio-manifest', async () => {
+  try {
+    return JSON.parse(fs.readFileSync(AUDIO_MANIFEST, 'utf8'))
+  } catch {
+    return []
+  }
+})
+
+app.addContentTypeParser(/^(audio|video)\//, { parseAs: 'buffer', bodyLimit: 2 * 1024 * 1024 }, (request, body, done) =>
+  done(null, body)
+)
+
+const audioKey = (raw) => String(raw ?? '').toLowerCase().normalize('NFC').trim().slice(0, 160)
+
+app.get('/api/audio', async () =>
+  db.prepare('SELECT key, updated_at AS updatedAt FROM audio ORDER BY key').all()
+)
+
+app.get('/api/audio/:key', async (request, reply) => {
+  const row = db.prepare('SELECT mime, data FROM audio WHERE key = ?').get(audioKey(request.params.key))
+  if (!row) return reply.code(404).send({ error: 'Sin grabación' })
+  reply.header('Cache-Control', 'public, max-age=31536000, immutable')
+  reply.type(row.mime)
+  return reply.send(Buffer.from(row.data))
+})
+
+app.put('/api/audio/:key', parentOnly, async (request, reply) => {
+  const key = audioKey(request.params.key)
+  const body = request.body
+  if (!key || !Buffer.isBuffer(body) || body.length < 200) {
+    return reply.code(400).send({ error: 'Grabación vacía' })
+  }
+  const mime = String(request.headers['content-type'] ?? 'audio/webm').slice(0, 80)
+  const updatedAt = new Date().toISOString()
+  db.prepare(
+    `INSERT INTO audio (key, mime, data, updated_at) VALUES (?, ?, ?, ?)
+     ON CONFLICT(key) DO UPDATE SET mime = excluded.mime, data = excluded.data, updated_at = excluded.updated_at`
+  ).run(key, mime, body, updatedAt)
+  return { ok: true, key, updatedAt }
+})
+
+app.delete('/api/audio/:key', parentOnly, async (request) => {
+  db.prepare('DELETE FROM audio WHERE key = ?').run(audioKey(request.params.key))
+  return { ok: true }
 })
 
 app.post('/api/rewards/unlock', async (request, reply) => {
@@ -289,18 +736,62 @@ app.post('/api/rewards/unlock', async (request, reply) => {
   return { ok: true, coins: getProfile(profileId).coins, item }
 })
 
-app.get('/api/parents/summary', async () => {
+app.get('/api/parents/status', async (request) => ({
+  hasPin: Boolean(storedPin()),
+  authed: Boolean(storedPin()) && hasSession(request)
+}))
+
+// Crea el PIN (si no hay) o lo cambia (con sesión abierta).
+app.post('/api/parents/pin', async (request, reply) => {
+  const pin = String(request.body?.pin ?? '')
+  if (!validPin(pin)) return reply.code(400).send({ error: 'El PIN debe tener de 4 a 8 números' })
+  if (storedPin() && !hasSession(request)) {
+    return reply.code(401).send({ error: 'Entra a la zona de Padres con tu PIN', code: 'pin-login' })
+  }
+  db.prepare(
+    'INSERT INTO config (key, value) VALUES (?, ?) ON CONFLICT(key) DO UPDATE SET value = excluded.value'
+  ).run(PIN_KEY, hashPin(pin))
+  sessions.clear()
+  return { ok: true, token: newSession() }
+})
+
+app.post('/api/parents/login', async (request, reply) => {
+  const stored = storedPin()
+  if (!stored) return reply.code(403).send({ error: 'Primero crea un PIN', code: 'pin-required' })
+  const wait = Math.ceil((lockedUntil - Date.now()) / 1000)
+  if (wait > 0) return reply.code(429).send({ error: `Demasiados intentos. Espera ${wait} segundos.` })
+  const pin = String(request.body?.pin ?? '')
+  if (!validPin(pin) || !pinMatches(pin, stored)) {
+    pinFails += 1
+    if (pinFails >= MAX_PIN_FAILS) {
+      pinFails = 0
+      lockedUntil = Date.now() + LOCK_MS
+    }
+    return reply.code(401).send({ error: 'PIN incorrecto', code: 'pin-wrong' })
+  }
+  pinFails = 0
+  return { ok: true, token: newSession() }
+})
+
+app.get('/api/parents/summary', parentOnly, async () => {
   const profiles = db.prepare('SELECT id, name, avatar, coins, created_at FROM profiles ORDER BY id').all()
   return profiles.map((profile) => {
     const summary = getSummary(profile.id)
     const last = db
       .prepare('SELECT MAX(completed_at) AS last FROM progress WHERE profile_id = ?')
       .get(profile.id)
-    return { ...profile, ...summary, lastPlayed: last?.last ?? null }
+    return {
+      ...profile,
+      ...summary,
+      lastPlayed: last?.last ?? null,
+      confusions: getConfusions(profile.id),
+      week: getWeek(profile.id),
+      letters: getLetters(profile.id)
+    }
   })
 })
 
-app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
+app.delete('/api/profiles/:profileId/progress', parentOnly, async (request, reply) => {
   const profileId = Number(request.params.profileId)
   if (!getProfile(profileId)) return reply.code(404).send({ error: 'Perfil no encontrado' })
   db.exec('BEGIN')
@@ -310,6 +801,7 @@ app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
     db.prepare('DELETE FROM badges WHERE profile_id = ?').run(profileId)
     db.prepare('DELETE FROM unlocks WHERE profile_id = ?').run(profileId)
     db.prepare('DELETE FROM daily WHERE profile_id = ?').run(profileId)
+    db.prepare('DELETE FROM mistakes WHERE profile_id = ?').run(profileId)
     db.prepare('UPDATE profiles SET coins = 0 WHERE id = ?').run(profileId)
     db.exec('COMMIT')
   } catch (error) {
@@ -319,11 +811,18 @@ app.delete('/api/profiles/:profileId/progress', async (request, reply) => {
   return { ok: true }
 })
 
-app.get('/api/backup', async (request, reply) => {
-  db.exec('PRAGMA wal_checkpoint(FULL);')
+app.get('/api/backup', parentOnly, async (request, reply) => {
+  const temp = path.join(BACKUP_DIR, `.descarga-${crypto.randomBytes(6).toString('hex')}.db`)
+  let data
+  try {
+    snapshotTo(temp)
+    data = fs.readFileSync(temp)
+  } finally {
+    fs.rmSync(temp, { force: true })
+  }
   reply.header('Content-Disposition', `attachment; filename="chispa-${todayStr()}.db"`)
   reply.type('application/octet-stream')
-  return reply.send(fs.createReadStream(DB_PATH))
+  return reply.send(data)
 })
 
 if (fs.existsSync(WEB_DIST)) {
@@ -357,6 +856,9 @@ async function start() {
 }
 
 start()
+
+autoBackup()
+setInterval(autoBackup, 60 * 60 * 1000).unref()
 
 for (const signal of ['SIGINT', 'SIGTERM']) {
   process.on(signal, async () => {

@@ -1,0 +1,49 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            web/package-lock.json
+            server/package-lock.json
+
+      - name: Contenido — pruebas del motor de sílabas
+        run: node --test "content/tools/*.test.mjs"
+
+      - name: Contenido — regenerar y validar
+        run: |
+          node content/tools/build.mjs
+          node content/tools/validate.mjs
+          node content/tools/docs.mjs
+
+      - name: Contenido — lo generado está al día
+        run: git diff --exit-code -- content/worlds.json docs/CURRICULO.md content/audio
+
+      - name: Servidor — dependencias y pruebas
+        working-directory: server
+        run: |
+          npm ci --no-audit --no-fund
+          npm test
+
+      - name: Web — dependencias, tipos, pruebas y build
+        working-directory: web
+        run: |
+          npm ci --no-audit --no-fund
+          npm run typecheck
+          npm test
+          npm run build

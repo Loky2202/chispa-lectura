@@ -32,8 +32,16 @@ export const BADGES = {
   'cinco-lecciones': { name: 'Cinco estrellas de esfuerzo', emoji: '🌟' },
   'diez-lecciones': { name: 'Diez lecciones', emoji: '🔟' },
   'veinte-lecciones': { name: 'Lector valiente', emoji: '📚' },
+  'treinta-lecciones': { name: 'Súper lector', emoji: '🚀' },
+  'cincuenta-lecciones': { name: 'Gran lector', emoji: '🦸' },
+  'todas-lecciones': { name: 'Todas las lecciones', emoji: '👑' },
   'primer-mundo': { name: 'Explorador de mundos', emoji: '🗺️' },
   perfecto: { name: 'Puntería perfecta', emoji: '🎯' },
+  'diez-perfectas': { name: 'Diez lecciones perfectas', emoji: '💯' },
   'tres-dias': { name: 'Tres días seguidos', emoji: '🔥' },
+  'siete-dias': { name: 'Una semana seguida', emoji: '📅' },
+  'catorce-dias': { name: 'Dos semanas seguidas', emoji: '🌋' },
+  'repaso-5': { name: 'Arreglé 5 que me costaban', emoji: '💪' },
+  'repaso-15': { name: 'Arreglé 15 que me costaban', emoji: '🏋️' },
   'monedas-100': { name: 'Ahorrador', emoji: '💰' }
 }

@@ -1,7 +1,10 @@
 import { create } from 'zustand'
-import { api } from './api'
+import { api, isPermanent, newRequestId } from './api'
+import { setDailyLimit } from './session'
+import { loadRecordedAudio } from './speech'
 import type {
   CompleteResult,
+  Mistake,
   Profile,
   ProgressData,
   Reward,
@@ -14,12 +17,22 @@ interface CompleteBody {
   correct: number
   total: number
   seconds: number
+  mistakes?: Mistake[]
+  requestId?: string
 }
 
-interface QueuedCompletion {
-  lessonId: string
-  body: CompleteBody
+interface ReviewBody {
+  profileId: number
+  seconds: number
+  mistakes: Mistake[]
+  solved: Mistake[]
+  requestId?: string
 }
+
+// Lo que no se pudo enviar. Los elementos sin `kind` son lecciones (formato anterior).
+type QueuedCompletion =
+  | { kind?: 'lesson'; lessonId: string; body: CompleteBody }
+  | { kind: 'review'; body: ReviewBody }
 
 interface Store {
   content: World[]
@@ -39,8 +52,10 @@ interface Store {
     stars: number,
     correct: number,
     total: number,
-    seconds: number
+    seconds: number,
+    mistakes?: Mistake[]
   ) => Promise<CompleteResult>
+  completeReview: (seconds: number, mistakes: Mistake[], solved: Mistake[]) => Promise<CompleteResult>
   unlock: (itemId: string) => Promise<{ ok: boolean; error?: string }>
   logout: () => void
 }
@@ -76,18 +91,33 @@ function saveQueue(queue: QueuedCompletion[]) {
   writeJson(QUEUE_KEY, queue)
 }
 
+function enqueue(item: QueuedCompletion) {
+  saveQueue([...readQueue(), item])
+}
+
+let flushing = false
+
+// Envía lo pendiente, uno por uno. Cada envío lleva su requestId, así que repetirlo es seguro.
+// Lo que el servidor rechaza de forma definitiva (perfil o lección que ya no existe) se descarta.
 async function flushQueue() {
-  const queue = readQueue()
-  if (!queue.length || !navigator.onLine) return
-  const pending: QueuedCompletion[] = []
-  for (const item of queue) {
-    try {
-      await api.completeLesson(item.lessonId, item.body)
-    } catch {
-      pending.push(item)
+  if (flushing || !navigator.onLine) return
+  flushing = true
+  try {
+    while (true) {
+      const [item] = readQueue()
+      if (!item) break
+      try {
+        if (item.kind === 'review') await api.completeReview(item.body)
+        else await api.completeLesson(item.lessonId, item.body)
+      } catch (error) {
+        if (!isPermanent(error)) break
+      }
+      // Se vuelve a leer por si se encoló algo mientras se enviaba (lo nuevo va al final).
+      saveQueue(readQueue().slice(1))
     }
+  } finally {
+    flushing = false
   }
-  saveQueue(pending)
 }
 
 function energyFor(lessons: number, stars: number): number {
@@ -115,6 +145,14 @@ export const useStore = create<Store>((set, get) => ({
       writeJson(CONTENT_KEY, content.worlds)
       writeJson(PROFILES_KEY, profiles)
       set({ content: content.worlds, profiles, rewards })
+      void loadRecordedAudio()
+      // El tiempo diario se elige en Padres y vale para todos los dispositivos.
+      void api
+        .settings()
+        .then((settings) => {
+          if (settings.dailyMinutes !== null) setDailyLimit(settings.dailyMinutes)
+        })
+        .catch(() => undefined)
       const saved = Number(localStorage.getItem(PROFILE_KEY))
       if (saved && profiles.some((profile) => profile.id === saved)) {
         await get().selectProfile(saved)
@@ -173,23 +211,29 @@ export const useStore = create<Store>((set, get) => ({
     }
   },
 
-  completeLesson: async (lessonId, stars, correct, total, seconds) => {
+  completeLesson: async (lessonId, stars, correct, total, seconds, mistakes = []) => {
     const { profile, data } = get()
     if (!profile) throw new Error('No hay perfil activo')
 
     const previous = data?.progress[lessonId]
     const firstTime = !previous
     const coinsEarned = stars * 5 + (firstTime ? 5 : 0)
-    const body: CompleteBody = { profileId: profile.id, stars, correct, total, seconds }
+    const body: CompleteBody = {
+      profileId: profile.id,
+      stars,
+      correct,
+      total,
+      seconds,
+      mistakes,
+      requestId: newRequestId()
+    }
 
     try {
       const result = await api.completeLesson(lessonId, body)
       await get().refresh()
       return result
-    } catch {
-      const queue = readQueue()
-      queue.push({ lessonId, body })
-      saveQueue(queue)
+    } catch (error) {
+      if (!isPermanent(error)) enqueue({ kind: 'lesson', lessonId, body })
 
       const current = get().data
       if (current) {
@@ -230,6 +274,50 @@ export const useStore = create<Store>((set, get) => ({
         todaySeconds: get().data?.todaySeconds ?? 0,
         streak: get().data?.streak ?? 0,
         energy: get().data?.energy ?? 1
+      }
+    }
+  },
+
+  // Sin conexión el repaso también se encola: al volver se guardan sus errores y lo resuelto.
+  completeReview: async (seconds, mistakes, solved) => {
+    const { profile } = get()
+    if (!profile) throw new Error('No hay perfil activo')
+    const body: ReviewBody = { profileId: profile.id, seconds, mistakes, solved, requestId: newRequestId() }
+    try {
+      const result = await api.completeReview(body)
+      await get().refresh()
+      return result
+    } catch (error) {
+      const queued = !isPermanent(error)
+      if (queued) enqueue({ kind: 'review', body })
+      const coinsEarned = queued ? 5 : 0
+
+      const current = get().data
+      if (current && queued) {
+        const done = new Set(solved.map((item) => `${item.kind}|${item.item}`))
+        const nextProfile = { ...current.profile, coins: current.profile.coins + coinsEarned }
+        const nextData: ProgressData = {
+          ...current,
+          profile: nextProfile,
+          trouble: current.trouble?.filter((item) => !done.has(`${item.kind}|${item.item}`)),
+          totalSeconds: current.totalSeconds + seconds,
+          todaySeconds: current.todaySeconds + seconds
+        }
+        writeJson(progressKey(profile.id), nextData)
+        set({ data: nextData, profile: nextProfile })
+      }
+
+      const latest = get().data
+      return {
+        coinsEarned,
+        totalCoins: latest?.profile.coins ?? profile.coins,
+        newBadges: [],
+        lessonsCompleted: latest?.lessonsCompleted ?? 0,
+        totalStars: latest?.totalStars ?? 0,
+        totalSeconds: latest?.totalSeconds ?? 0,
+        todaySeconds: latest?.todaySeconds ?? seconds,
+        streak: latest?.streak ?? 0,
+        energy: latest?.energy ?? 1
       }
     }
   },

@@ -63,6 +63,14 @@ export default function App() {
           }
         />
         <Route
+          path="/repaso"
+          element={
+            <RequireProfile>
+              <LessonPage review />
+            </RequireProfile>
+          }
+        />
+        <Route
           path="/garaje"
           element={
             <RequireProfile>
